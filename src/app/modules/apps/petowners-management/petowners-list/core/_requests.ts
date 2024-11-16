@@ -66,9 +66,6 @@ const exportToExcel = (data: User[]) => {
 			", Brgy." +
 			user.addr_brgy +
 			", San Jose City, NE",
-		// "License Number": user.license_number,
-		// // "E-Signature": user.electronic_signature,
-		// Status: user.status,
 	}));
 
 	// Create a new workbook and add a worksheet
@@ -78,11 +75,9 @@ const exportToExcel = (data: User[]) => {
 	// Define column widths
 	worksheet["!cols"] = [
 		{ wpx: 150 }, // Name
-		{ wpx: 200 }, // Position
-		{ wpx: 120 }, // Position
-		{ wpx: 150 }, // License Number
+		{ wpx: 200 }, // Email
 		{ wpx: 150 }, // Phone Number
-		{ wpx: 100 }, // Status
+		{ wpx: 250 }, // Address
 	];
 
 	// Append the worksheet to the workbook

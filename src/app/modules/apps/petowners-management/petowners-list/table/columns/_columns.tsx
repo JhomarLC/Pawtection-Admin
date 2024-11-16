@@ -1,21 +1,21 @@
 import { Column } from "react-table";
 import { PetownerInfoCell } from "./PetownerInfoCell";
 import { PetownerActionsCell } from "./PetownerActionsCell";
-import { PetownerSelectionCell } from "./PetownerSelectionCell";
+// import { PetownerSelectionCell } from "./PetownerSelectionCell";
 import { PetownerCustomHeader } from "./PetownerCustomHeader";
-import { PetownerSelectionHeader } from "./PetownerSelectionHeader";
+// import { PetownerSelectionHeader } from "./PetownerSelectionHeader";
 import { User } from "../../core/_models";
 import { PetownerAddress } from "./PetownerAddress";
 import { PetownerPhoneNumber } from "./PetownerPhoneNumber";
 
 const petownersColumns: ReadonlyArray<Column<User>> = [
-	{
-		Header: (props) => <PetownerSelectionHeader tableProps={props} />,
-		id: "selection",
-		Cell: ({ ...props }) => (
-			<PetownerSelectionCell id={props.data[props.row.index].id} />
-		),
-	},
+	// {
+	// 	Header: (props) => <PetownerSelectionHeader tableProps={props} />,
+	// 	id: "selection",
+	// 	Cell: ({ ...props }) => (
+	// 		<PetownerSelectionCell id={props.data[props.row.index].id} />
+	// 	),
+	// },
 	{
 		Header: (props) => (
 			<PetownerCustomHeader

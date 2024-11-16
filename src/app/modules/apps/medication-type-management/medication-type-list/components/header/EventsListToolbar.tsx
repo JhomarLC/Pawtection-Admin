@@ -16,10 +16,10 @@ const EventsListToolbar = () => {
 			<EventsListFilter />
 
 			{/* begin::Export */}
-			<button type="button" className="btn btn-light-primary me-3">
+			{/* <button type="button" className="btn btn-light-primary me-3">
 				<KTIcon iconName="exit-up" className="fs-2" />
 				Export
-			</button>
+			</button> */}
 			{/* end::Export */}
 
 			{/* begin::Add user */}

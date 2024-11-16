@@ -23,42 +23,36 @@ const VeterinariansListToolbar = () => {
 			{/* begin::Export */}
 			<button
 				type="button"
-				className="btn btn-light-primary me-3"
-				data-kt-menu-trigger="click"
-				data-kt-menu-placement="bottom-end"
+				className="btn btn-light-success me-3"
+				onClick={() => {
+					if (
+						window.confirm(
+							"Are you sure you want to export the data to Excel?"
+						)
+					) {
+						exportToExcel(data);
+					}
+				}}
 			>
-				<KTIcon iconName="exit-up" className="fs-2" />
-				Export
+				<KTIcon iconName="notepad" className="fs-2" />
+				Export to Excel
 			</button>
-			<div
-				className="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-bold fs-7 w-125px py-4"
-				data-kt-menu="true"
+			<button
+				type="button"
+				className="btn btn-light-danger me-3"
+				onClick={() => {
+					if (
+						window.confirm(
+							"Are you sure you want to export the data to PDF?"
+						)
+					) {
+						exportToPDF(data);
+					}
+				}}
 			>
-				<div
-					className="menu-item px-3"
-					onClick={() => exportToExcel(data)}
-				>
-					<a className="menu-link px-3 flex gap-3">
-						<KTIcon iconName="notepad" className="fs-2" /> Excel
-					</a>
-				</div>
-				<div
-					className="menu-item px-3"
-					onClick={() => exportToPDF(data)}
-				>
-					<a className="menu-link px-3 flex gap-3">
-						<KTIcon iconName="some-files" className="fs-2" /> PDF
-					</a>
-				</div>
-			</div>
-			{/* end::Export */}
-
-			{/* begin::Add user */}
-			{/* <button type='button' className='btn btn-primary' onClick={openAddUserModal}>
-        <KTIcon iconName='plus' className='fs-2' />
-        Add Veterinarians
-      </button> */}
-			{/* end::Add user */}
+				<KTIcon iconName="some-files" className="fs-2" />
+				Export to PDF
+			</button>
 		</div>
 	);
 };

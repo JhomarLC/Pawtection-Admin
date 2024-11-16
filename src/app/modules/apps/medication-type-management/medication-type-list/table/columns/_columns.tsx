@@ -1,22 +1,22 @@
 import { Column } from "react-table";
 import { MedicationsTypeInfoCell } from "./MedicationsTypeInfoCell";
 import { MedicationsTypeActionsCell } from "./MedicationsTypeActionsCell";
-import { MedicationsTypeSelectionCell } from "./MedicationsTypeSelectionCell";
+// import { MedicationsTypeSelectionCell } from "./MedicationsTypeSelectionCell";
 import { MedicationsTypeCustomHeader } from "./MedicationsTypeCustomHeader";
-import { MedicationsTypeSelectionHeader } from "./MedicationsTypeSelectionHeader";
+// import { MedicationsTypeSelectionHeader } from "./MedicationsTypeSelectionHeader";
 import { MType } from "../../core/_models";
 import { MedicationsTypeStatus } from "./MedicationsTypeStatus";
 
 const eventsColumns: ReadonlyArray<Column<MType>> = [
-	{
-		Header: (props) => (
-			<MedicationsTypeSelectionHeader tableProps={props} />
-		),
-		id: "selection",
-		Cell: ({ ...props }) => (
-			<MedicationsTypeSelectionCell id={props.data[props.row.index].id} />
-		),
-	},
+	// {
+	// 	Header: (props) => (
+	// 		<MedicationsTypeSelectionHeader tableProps={props} />
+	// 	),
+	// 	id: "selection",
+	// 	Cell: ({ ...props }) => (
+	// 		<MedicationsTypeSelectionCell id={props.data[props.row.index].id} />
+	// 	),
+	// },
 	{
 		Header: (props) => (
 			<MedicationsTypeCustomHeader

@@ -1,15 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { KTIcon } from "../../../../../../../_metronic/helpers";
 import { exportToExcel, exportToPDF } from "../../core/_requests";
 import { useQueryResponseData } from "../../core/QueryResponseProvider";
-import { MenuComponent } from "../../../../../../../_metronic/assets/ts/components";
 
 const PetownersExport = () => {
 	const users = useQueryResponseData();
 	const data = useMemo(() => users, [users]);
-	useEffect(() => {
-		MenuComponent.reinitialization2();
-	}, []);
 
 	return (
 		<>

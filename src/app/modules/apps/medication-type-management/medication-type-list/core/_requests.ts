@@ -7,6 +7,8 @@ const USER_URL = `${API_URL}/medtype`;
 const GET_USERS_URL = `${API_URL}/medtype`;
 
 const getUsers = (query: string): Promise<UsersQueryResponse> => {
+	console.log(query);
+
 	return axios
 		.get(`${GET_USERS_URL}?${query}`)
 		.then((d: AxiosResponse<UsersQueryResponse>) => d.data);

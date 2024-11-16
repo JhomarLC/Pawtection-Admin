@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
 	initialQueryState,
 	KTIcon,
 } from "../../../../../../../_metronic/helpers";
 import { useQueryRequest } from "../../core/QueryRequestProvider";
 import { useQueryResponse } from "../../core/QueryResponseProvider";
+import { MenuComponent } from "../../../../../../../_metronic/assets/ts/components";
 
 const PetownersListFilter = () => {
 	const { updateState } = useQueryRequest();
 	const { isLoading } = useQueryResponse();
 	const [brgy, setBrgy] = useState<string | undefined>();
 
+	useEffect(() => {
+		MenuComponent.reinitialization();
+	}, []);
 	const resetData = () => {
 		updateState({ filter: undefined, ...initialQueryState });
 	};

@@ -4,6 +4,18 @@ import { MedicationsNameListWrapper } from "./medication-name-list/MedicationsNa
 
 const usersBreadcrumbs: Array<PageLink> = [
 	{
+		title: "Dashboard",
+		path: "/dashboard",
+		isSeparator: false,
+		isActive: false,
+	},
+	{
+		title: "",
+		path: "",
+		isSeparator: true,
+		isActive: false,
+	},
+	{
 		title: "Medications Type",
 		path: "/medications-type",
 		isSeparator: false,

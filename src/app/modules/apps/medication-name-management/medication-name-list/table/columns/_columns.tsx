@@ -1,22 +1,22 @@
 import { Column } from "react-table";
 import { MedicationsNameInfoCell } from "./MedicationsNameInfoCell";
 import { MedicationsNameActionsCell } from "./MedicationsNameActionsCell";
-import { MedicationsNameSelectionCell } from "./MedicationsNameSelectionCell";
+// import { MedicationsNameSelectionCell } from "./MedicationsNameSelectionCell";
 import { MedicationsNameCustomHeader } from "./MedicationsNameCustomHeader";
-import { MedicationsNameSelectionHeader } from "./MedicationsNameSelectionHeader";
+// import { MedicationsNameSelectionHeader } from "./MedicationsNameSelectionHeader";
 import { MNames } from "../../core/_models";
 import { MedicationsNameStatus } from "./MedicationsNameStatus";
 
 const eventsColumns: ReadonlyArray<Column<MNames>> = [
-	{
-		Header: (props) => (
-			<MedicationsNameSelectionHeader tableProps={props} />
-		),
-		id: "selection",
-		Cell: ({ ...props }) => (
-			<MedicationsNameSelectionCell id={props.data[props.row.index].id} />
-		),
-	},
+	// {
+	// 	Header: (props) => (
+	// 		<MedicationsNameSelectionHeader tableProps={props} />
+	// 	),
+	// 	id: "selection",
+	// 	Cell: ({ ...props }) => (
+	// 		<MedicationsNameSelectionCell id={props.data[props.row.index].id} />
+	// 	),
+	// },
 	{
 		Header: (props) => (
 			<MedicationsNameCustomHeader
