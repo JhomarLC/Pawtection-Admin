@@ -11,6 +11,7 @@ import PetPage from "../modules/apps/pets-management/PetPage";
 import MedicationsTypePage from "../modules/apps/medication-type-management/MedicationTypesPage";
 import MedicationsNamePage from "../modules/apps/medication-name-management/MedicationsNamePage";
 import EventsPage from "../modules/apps/events-management/EventsPage";
+import PetMedicationsPage from "../modules/apps/pets-medications/PetMedicationsPage";
 
 const PrivateRoutes = () => {
 	return (
@@ -41,6 +42,14 @@ const PrivateRoutes = () => {
 					element={
 						<SuspensedView>
 							<PetPage />
+						</SuspensedView>
+					}
+				/>
+				<Route
+					path="pets/:petId/medications/*"
+					element={
+						<SuspensedView>
+							<PetMedicationsPage />
 						</SuspensedView>
 					}
 				/>

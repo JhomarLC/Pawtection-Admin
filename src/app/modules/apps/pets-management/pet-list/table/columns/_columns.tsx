@@ -1,9 +1,9 @@
 import { Column } from "react-table";
 import { PetInfoCell } from "./PetInfoCell";
 import { PetActionsCell } from "./PetActionsCell";
-import { PetSelectionCell } from "./PetSelectionCell";
+// import { PetSelectionCell } from "./PetSelectionCell";
 import { PetCustomHeader } from "./PetCustomHeader";
-import { PetSelectionHeader } from "./PetSelectionHeader";
+// import { PetSelectionHeader } from "./PetSelectionHeader";
 import { Pet } from "../../core/_models";
 import { PetBreed } from "./PetBreed";
 import { PetDOB } from "./PetDOB";
@@ -12,13 +12,13 @@ import { PetStatus } from "./PetStatus";
 // import { PetPhoneNumber } from "./PetPhoneNumber";
 
 const petownersColumns: ReadonlyArray<Column<Pet>> = [
-	{
-		Header: (props) => <PetSelectionHeader tableProps={props} />,
-		id: "selection",
-		Cell: ({ ...props }) => (
-			<PetSelectionCell id={props.data[props.row.index].id} />
-		),
-	},
+	// {
+	// 	Header: (props) => <PetSelectionHeader tableProps={props} />,
+	// 	id: "selection",
+	// 	Cell: ({ ...props }) => (
+	// 		<PetSelectionCell id={props.data[props.row.index].id} />
+	// 	),
+	// },
 
 	{
 		Header: (props) => (

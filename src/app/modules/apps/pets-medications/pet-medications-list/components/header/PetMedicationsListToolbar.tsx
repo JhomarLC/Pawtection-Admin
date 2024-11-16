@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 // import { useListView } from "../../core/ListViewProvider";
 // import { PetListFilter } from "./PetListFilter";
 
-const PetListToolbar = () => {
+const PetMedicationsListToolbar = () => {
 	// const { setItemIdForUpdate } = useListView();
 	// const openAddUserModal = () => {
 	// 	setItemIdForUpdate(null);
@@ -41,4 +41,4 @@ const PetListToolbar = () => {
 	);
 };
 
-export { PetListToolbar };
+export { PetMedicationsListToolbar };

@@ -3,19 +3,16 @@ import { FC, useEffect } from "react";
 import { MenuComponent } from "../../../../../../../_metronic/assets/ts/components";
 import { KTIcon } from "../../../../../../../_metronic/helpers";
 // import { KTIcon, QUERIES } from "../../../../../../../_metronic/helpers";
-import { useListView } from "../../core/ListViewProvider";
-import { useNavigate } from "react-router-dom";
+// import { useListView } from "../../core/ListViewProvider";
 // import { useQueryResponse } from "../../core/QueryResponseProvider";
 // import { deleteUser } from "../../core/_requests";
 
 type Props = {
-	id: string | undefined;
+	id: number | undefined;
 };
 
-const PetActionsCell: FC<Props> = ({ id }) => {
-	const navigate = useNavigate();
-
-	const { setItemIdForUpdate } = useListView();
+const PetMedicationsActionsCell: FC<Props> = ({ id }) => {
+	// const { setItemIdForUpdate } = useListView();
 	// const { query } = useQueryResponse();
 	// const queryClient = useQueryClient();
 
@@ -23,9 +20,9 @@ const PetActionsCell: FC<Props> = ({ id }) => {
 		MenuComponent.reinitialization();
 	}, []);
 
-	const openEditModal = () => {
-		setItemIdForUpdate(id);
-	};
+	// const openEditModal = () => {
+	// 	setItemIdForUpdate(id);
+	// };
 
 	// const deleteItem = useMutation(() => deleteUser(id), {
 	// 	// 💡 response of the mutation is passed to onSuccess
@@ -35,9 +32,9 @@ const PetActionsCell: FC<Props> = ({ id }) => {
 	// 	},
 	// });
 
-	const viewMedications = (id: string | undefined) => {
+	const viewMedications = (id: number | undefined) => {
 		if (id) {
-			navigate(`/pets/${id}/medications`);
+			console.log(id);
 		} else {
 			console.log("No ID provided");
 		}
@@ -49,7 +46,7 @@ const PetActionsCell: FC<Props> = ({ id }) => {
 				className="btn btn-light btn-active-light-success btn-sm mx-5"
 				data-kt-menu-trigger="click"
 				data-kt-menu-placement="bottom-end"
-				onClick={() => openEditModal()}
+				// onClick={() => openEditModal()}
 			>
 				<KTIcon iconName="eye" className="fs-5 m-0" />
 				Photos
@@ -67,4 +64,4 @@ const PetActionsCell: FC<Props> = ({ id }) => {
 	);
 };
 
-export { PetActionsCell };
+export { PetMedicationsActionsCell };

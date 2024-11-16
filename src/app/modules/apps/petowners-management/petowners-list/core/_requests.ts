@@ -44,7 +44,6 @@ const deleteSelectedUsers = (userIds: Array<ID>): Promise<void> => {
 	const requests = userIds.map((id) => axios.delete(`${USER_URL}/${id}`));
 	return axios.all(requests).then(() => {});
 };
-
 const exportToExcel = (data: User[]) => {
 	// Generate file name with current date and random number
 	const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -53,10 +52,6 @@ const exportToExcel = (data: User[]) => {
 
 	// Map data to a format suitable for Excel
 	const formattedData = data.map((user) => ({
-		// Picture:
-		// 	import.meta.env.VITE_APP_BACKEND_IMAGE +
-		// 	"/vet_profiles/" +
-		// 	user.image,
 		Name: user.name,
 		Email: user.email,
 		"Phone Number": user.phone_number,
@@ -68,20 +63,88 @@ const exportToExcel = (data: User[]) => {
 			", San Jose City, NE",
 	}));
 
-	// Create a new workbook and add a worksheet
-	const workbook = XLSX.utils.book_new();
-	const worksheet = XLSX.utils.json_to_sheet(formattedData);
+	// List of barangays
+	const barangays = [
+		"A. Pascual",
+		"Abar Ist",
+		"Abar 2nd",
+		"Bagong Sikat",
+		"Caanawan",
+		"Calaocan",
+		"Camanacsacan",
+		"Culaylay",
+		"Dizol",
+		"Kaliwanagan",
+		"Kita-Kita",
+		"Malasin",
+		"Manicla",
+		"Palestina",
+		"Parang Mangga",
+		"Villa Joson",
+		"Pinili",
+		"Rafael Rueda, Sr. Pob.",
+		"Ferdinand E. Marcos Pob.",
+		"Canuto Ramos Pob.",
+		"Raymundo Eugenio Pob.",
+		"Crisanto Sanchez Pob.",
+		"Porais",
+		"San Agustin",
+		"San Juan",
+		"San Mauricio",
+		"Santo Niño 1st",
+		"Santo Niño 2nd",
+		"Santo Tomas",
+		"Sibut",
+		"Sinipit Bubon",
+		"Santo Niño 3rd",
+		"Tabulac",
+		"Tayabo",
+		"Tondod",
+		"Tulat",
+		"Villa Floresca",
+		"Villa Marina",
+	];
 
-	// Define column widths
-	worksheet["!cols"] = [
+	// Create a new workbook
+	const workbook = XLSX.utils.book_new();
+
+	// Add a general worksheet with all veterinarians
+	const generalWorksheet = XLSX.utils.json_to_sheet(formattedData);
+	generalWorksheet["!cols"] = [
 		{ wpx: 150 }, // Name
 		{ wpx: 200 }, // Email
 		{ wpx: 150 }, // Phone Number
 		{ wpx: 250 }, // Address
 	];
+	XLSX.utils.book_append_sheet(workbook, generalWorksheet, "Veterinarians");
 
-	// Append the worksheet to the workbook
-	XLSX.utils.book_append_sheet(workbook, worksheet, "Veterinarians");
+	// Add a worksheet for each barangay
+	barangays.forEach((barangay) => {
+		const barangayData = data
+			.filter((user) => user.addr_brgy === barangay) // Filter users by barangay
+			.map((user) => ({
+				Name: user.name,
+				Email: user.email,
+				"Phone Number": user.phone_number,
+				Address:
+					"Zone " +
+					user.addr_zone +
+					", Brgy." +
+					user.addr_brgy +
+					", San Jose City, NE",
+			}));
+
+		if (barangayData.length > 0) {
+			const barangayWorksheet = XLSX.utils.json_to_sheet(barangayData);
+			barangayWorksheet["!cols"] = [
+				{ wpx: 150 }, // Name
+				{ wpx: 200 }, // Email
+				{ wpx: 150 }, // Phone Number
+				{ wpx: 250 }, // Address
+			];
+			XLSX.utils.book_append_sheet(workbook, barangayWorksheet, barangay);
+		}
+	});
 
 	// Write to an Excel file and trigger the download
 	XLSX.writeFile(workbook, `${fileName}.xlsx`);

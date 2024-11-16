@@ -8,7 +8,7 @@ import {
 } from "../../../../../../../_metronic/helpers";
 import { useQueryRequest } from "../../core/QueryRequestProvider";
 
-const PetListSearchComponent = () => {
+const PetMedicationsListSearchComponent = () => {
 	const { updateState } = useQueryRequest();
 	const [searchTerm, setSearchTerm] = useState<string>("");
 	// Debounce search term so that it only gives us latest value ...
@@ -52,4 +52,4 @@ const PetListSearchComponent = () => {
 	);
 };
 
-export { PetListSearchComponent };
+export { PetMedicationsListSearchComponent };

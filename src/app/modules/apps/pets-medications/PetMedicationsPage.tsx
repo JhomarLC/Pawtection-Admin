@@ -1,6 +1,6 @@
 import { Route, Routes, Outlet, Navigate } from "react-router-dom";
 import { PageLink, PageTitle } from "../../../../_metronic/layout/core";
-import { PetListWrapper } from "./pet-list/PetList";
+import { PetListWrapper } from "./pet-medications-list/PetMedicationsList";
 
 const usersBreadcrumbs: Array<PageLink> = [
 	{
@@ -29,7 +29,7 @@ const usersBreadcrumbs: Array<PageLink> = [
 	},
 ];
 
-const PetPage = () => {
+const PetMedicationsPage = () => {
 	return (
 		<Routes>
 			{/* Wrap with a parent route */}
@@ -53,4 +53,4 @@ const PetPage = () => {
 	);
 };
 
-export default PetPage;
+export default PetMedicationsPage;

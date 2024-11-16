@@ -69,18 +69,24 @@ const exportToExcel = (data: User[]) => {
 
 	// Map data to a format suitable for Excel
 	const formattedData = data.map((user) => ({
-		// Picture:
-		// 	import.meta.env.VITE_APP_BACKEND_IMAGE +
-		// 	"/vet_profiles/" +
-		// 	user.image,
 		Name: user.name,
 		Email: user.email,
 		Position: user.position,
 		"License Number": user.license_number,
 		"Phone Number": user.phone_number,
-		// "E-Signature": user.electronic_signature,
 		Status: user.status,
 	}));
+	// Filter and map data to include only specific statuses
+	const approvedVeterinarians = data
+		.filter((user) => user.status === "approved") // Include only "Pending" or "Approved"
+		.map((user) => ({
+			Name: user.name,
+			Email: user.email,
+			Position: user.position,
+			"License Number": user.license_number,
+			"Phone Number": user.phone_number,
+			Status: user.status, // Capitalize status (e.g., "Pending")
+		}));
 
 	// Create a new workbook and add a worksheet
 	const workbook = XLSX.utils.book_new();
@@ -98,6 +104,21 @@ const exportToExcel = (data: User[]) => {
 
 	// Append the worksheet to the workbook
 	XLSX.utils.book_append_sheet(workbook, worksheet, "Veterinarians");
+	// Add a worksheet for approved veterinarians
+	const approvedWorksheet = XLSX.utils.json_to_sheet(approvedVeterinarians);
+	approvedWorksheet["!cols"] = [
+		{ wpx: 150 }, // Name
+		{ wpx: 200 }, // Email
+		{ wpx: 120 }, // Position
+		{ wpx: 150 }, // License Number
+		{ wpx: 150 }, // Phone Number
+		{ wpx: 100 }, // Status
+	];
+	XLSX.utils.book_append_sheet(
+		workbook,
+		approvedWorksheet,
+		"Approved Veterinarians"
+	);
 
 	// Write to an Excel file and trigger the download
 	XLSX.writeFile(workbook, `${fileName}.xlsx`);
@@ -119,23 +140,35 @@ const exportToPDF = (data: User[]) => {
 		user.status,
 	]);
 
+	// Filter and format "Approved" veterinarians
+	const approvedData = data
+		.filter((user) => user.status === "approved")
+		.map((user) => [
+			user.name,
+			user.email,
+			user.position,
+			user.license_number,
+			user.phone_number,
+			user.status, // Capitalize status
+		]);
+
 	// Create a new PDF document
 	const doc = new jsPDF();
 
-	// Set title text
+	// Page 1: All Veterinarians
 	const title = "San Jose City Veterinary Clinic";
-	const subtitle = "Veterinarians";
+	const subtitle = "All Veterinarians";
 
 	// Calculate centered position for the title
 	const pageWidth = doc.internal.pageSize.getWidth();
 	const titleX = (pageWidth - doc.getTextWidth(title)) / 2;
 	const subtitleX = (pageWidth - doc.getTextWidth(subtitle)) / 2;
 
-	// Add centered title
-	doc.text(title, titleX, 10); // Adjust the y-position (10) as needed
-	doc.text(subtitle, subtitleX, 17); // Adjust the y-position (10) as needed
+	// Add centered title for the first page
+	doc.text(title, titleX, 10);
+	doc.text(subtitle, subtitleX, 17);
 
-	// Add table to PDF
+	// Add table for all data
 	doc.autoTable({
 		head: [
 			[
@@ -148,6 +181,35 @@ const exportToPDF = (data: User[]) => {
 			],
 		],
 		body: formattedData,
+		startY: 20,
+		styles: { fontSize: 10 },
+	});
+
+	// Add a new page for Approved Veterinarians
+	doc.addPage();
+
+	// Page 2: Approved Veterinarians
+	const approvedSubtitle = "Approved Veterinarians";
+	const approvedSubtitleX =
+		(pageWidth - doc.getTextWidth(approvedSubtitle)) / 2;
+
+	// Add title for the second page
+	doc.text(title, titleX, 10);
+	doc.text(approvedSubtitle, approvedSubtitleX, 17);
+
+	// Add table for approved data
+	doc.autoTable({
+		head: [
+			[
+				"Name",
+				"Email",
+				"Position",
+				"License Number",
+				"Phone Number",
+				"Status",
+			],
+		],
+		body: approvedData,
 		startY: 20,
 		styles: { fontSize: 10 },
 	});
