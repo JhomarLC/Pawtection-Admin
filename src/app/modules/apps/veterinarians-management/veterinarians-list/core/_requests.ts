@@ -60,12 +60,26 @@ const deleteSelectedUsers = (userIds: Array<ID>): Promise<void> => {
 	const requests = userIds.map((id) => axios.delete(`${USER_URL}/${id}`));
 	return axios.all(requests).then(() => {});
 };
-
 const exportToExcel = (data: User[]) => {
 	// Generate file name with current date and random number
 	const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 	const randomNum = Math.floor(Math.random() * 1000);
-	const fileName = `Veterinarians_${currentDate}_${randomNum}`;
+	const fileName = `Veterinarians_${currentDate}_${randomNum}.xlsx`;
+
+	// Generate title with the current date and time
+	const now = new Date();
+	const formattedNow = now.toLocaleString("en-PH", {
+		month: "long",
+		day: "2-digit",
+		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: true,
+	});
+
+	// Utility function to capitalize the first letter of a string
+	const capitalize = (str: string) =>
+		str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
 	// Map data to a format suitable for Excel
 	const formattedData = data.map((user) => ({
@@ -74,39 +88,38 @@ const exportToExcel = (data: User[]) => {
 		Position: user.position,
 		"License Number": user.license_number,
 		"Phone Number": user.phone_number,
-		Status: user.status,
+		Status: capitalize(user.status || "Unknown"),
 	}));
-	// Filter and map data to include only specific statuses
-	const approvedVeterinarians = data
-		.filter((user) => user.status === "approved") // Include only "Pending" or "Approved"
-		.map((user) => ({
-			Name: user.name,
-			Email: user.email,
-			Position: user.position,
-			"License Number": user.license_number,
-			"Phone Number": user.phone_number,
-			Status: user.status, // Capitalize status (e.g., "Pending")
-		}));
 
-	// Create a new workbook and add a worksheet
+	// Group data by status
+	const groupedData: Record<string, User[]> = data.reduce((acc, user) => {
+		const status = capitalize(user.status || "Unknown");
+		if (!acc[status]) acc[status] = [];
+		acc[status].push(user);
+		return acc;
+	}, {} as Record<string, User[]>);
+
+	// Create a new workbook
 	const workbook = XLSX.utils.book_new();
-	const worksheet = XLSX.utils.json_to_sheet(formattedData);
 
-	// Define column widths
-	worksheet["!cols"] = [
-		{ wpx: 150 }, // Name
-		{ wpx: 200 }, // Position
-		{ wpx: 120 }, // Position
-		{ wpx: 150 }, // License Number
-		{ wpx: 150 }, // Phone Number
-		{ wpx: 100 }, // Status
-	];
+	// Function to add a title row and merge cells
+	const addTitleToSheet = (
+		worksheet: XLSX.WorkSheet,
+		title: string,
+		columns: number
+	) => {
+		// Add title at A1
+		XLSX.utils.sheet_add_aoa(worksheet, [[title]], { origin: "A1" });
+		// Merge cells for the title row
+		worksheet["!merges"] = [
+			{ s: { r: 0, c: 0 }, e: { r: 0, c: columns - 1 } },
+		];
+	};
 
-	// Append the worksheet to the workbook
-	XLSX.utils.book_append_sheet(workbook, worksheet, "Veterinarians");
-	// Add a worksheet for approved veterinarians
-	const approvedWorksheet = XLSX.utils.json_to_sheet(approvedVeterinarians);
-	approvedWorksheet["!cols"] = [
+	// Add "All Veterinarians" sheet
+	const allVeterinariansTitle = `All Veterinarians as of ${formattedNow}`;
+	const allVeterinariansWorksheet = XLSX.utils.json_to_sheet(formattedData);
+	allVeterinariansWorksheet["!cols"] = [
 		{ wpx: 150 }, // Name
 		{ wpx: 200 }, // Email
 		{ wpx: 120 }, // Position
@@ -114,11 +127,41 @@ const exportToExcel = (data: User[]) => {
 		{ wpx: 150 }, // Phone Number
 		{ wpx: 100 }, // Status
 	];
+	addTitleToSheet(allVeterinariansWorksheet, allVeterinariansTitle, 6); // 6 columns
 	XLSX.utils.book_append_sheet(
 		workbook,
-		approvedWorksheet,
-		"Approved Veterinarians"
+		allVeterinariansWorksheet,
+		"All Veterinarians"
 	);
+
+	// Add a sheet for each status
+	Object.entries(groupedData).forEach(([status, users]) => {
+		const statusTitle = `All ${status} Veterinarians as of ${formattedNow}`;
+		const statusData = users.map((user) => ({
+			Name: user.name,
+			Email: user.email,
+			Position: user.position,
+			"License Number": user.license_number,
+			"Phone Number": user.phone_number,
+			Status: capitalize(user.status || "Unknown"),
+		}));
+
+		const statusWorksheet = XLSX.utils.json_to_sheet(statusData);
+		statusWorksheet["!cols"] = [
+			{ wpx: 150 }, // Name
+			{ wpx: 200 }, // Email
+			{ wpx: 120 }, // Position
+			{ wpx: 150 }, // License Number
+			{ wpx: 150 }, // Phone Number
+			{ wpx: 100 }, // Status
+		];
+		addTitleToSheet(statusWorksheet, statusTitle, 6); // 6 columns
+		XLSX.utils.book_append_sheet(
+			workbook,
+			statusWorksheet,
+			`${status} Veterinarians`
+		);
+	});
 
 	// Write to an Excel file and trigger the download
 	XLSX.writeFile(workbook, `${fileName}.xlsx`);
@@ -130,6 +173,21 @@ const exportToPDF = (data: User[]) => {
 	const randomNum = Math.floor(Math.random() * 1000);
 	const fileName = `Veterinarians_${currentDate}_${randomNum}.pdf`;
 
+	// Utility function to capitalize the first letter of a string
+	const capitalize = (str: string) =>
+		str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+	// Generate title with the current date and time
+	const now = new Date();
+	const formattedNow = now.toLocaleString("en-PH", {
+		month: "long",
+		day: "2-digit",
+		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: true,
+	});
+
 	// Map data to format suitable for PDF table
 	const formattedData = data.map((user) => [
 		user.name,
@@ -137,81 +195,73 @@ const exportToPDF = (data: User[]) => {
 		user.position,
 		user.license_number,
 		user.phone_number,
-		user.status,
+		capitalize(user.status || "Unknown"),
 	]);
 
-	// Filter and format "Approved" veterinarians
-	const approvedData = data
-		.filter((user) => user.status === "approved")
-		.map((user) => [
+	// Group data by status
+	const groupedData: Record<string, User[]> = data.reduce((acc, user) => {
+		const status = capitalize(user.status || "Unknown");
+		if (!acc[status]) acc[status] = [];
+		acc[status].push(user);
+		return acc;
+	}, {} as Record<string, User[]>);
+
+	// Create a new PDF document
+	const doc = new jsPDF();
+
+	// Function to add a title and table for each section
+	const addSectionToPDF = (
+		doc: jsPDF,
+		title: string,
+		subtitle: string,
+		data: any[]
+	) => {
+		// Calculate centered position for titles
+		const pageWidth = doc.internal.pageSize.getWidth();
+		const titleX = pageWidth / 2;
+
+		// Add title and subtitle
+		doc.setFontSize(14);
+		doc.text(title, titleX, 10, { align: "center" });
+		doc.setFontSize(10);
+		doc.text(subtitle, titleX, 17, { align: "center" });
+
+		// Add table
+		doc.autoTable({
+			head: [
+				[
+					"Name",
+					"Email",
+					"Position",
+					"License Number",
+					"Phone Number",
+					"Status",
+				],
+			],
+			body: data,
+			startY: 25,
+			styles: { fontSize: 10 },
+		});
+	};
+
+	// Add the "All Veterinarians" section
+	const clinicTitle = "San Jose City Veterinary Clinic";
+	const allVeterinariansSubtitle = `All Veterinarians as of ${formattedNow}`;
+	addSectionToPDF(doc, clinicTitle, allVeterinariansSubtitle, formattedData);
+
+	// Add a new page for each status
+	Object.entries(groupedData).forEach(([status, users]) => {
+		doc.addPage();
+		const statusSubtitle = `All ${status} Veterinarians as of ${formattedNow}`;
+		const statusData = users.map((user) => [
 			user.name,
 			user.email,
 			user.position,
 			user.license_number,
 			user.phone_number,
-			user.status, // Capitalize status
+			capitalize(user.status || "Unknown"),
 		]);
-
-	// Create a new PDF document
-	const doc = new jsPDF();
-
-	// Page 1: All Veterinarians
-	const title = "San Jose City Veterinary Clinic";
-	const subtitle = "All Veterinarians";
-
-	// Calculate centered position for the title
-	const pageWidth = doc.internal.pageSize.getWidth();
-	const titleX = (pageWidth - doc.getTextWidth(title)) / 2;
-	const subtitleX = (pageWidth - doc.getTextWidth(subtitle)) / 2;
-
-	// Add centered title for the first page
-	doc.text(title, titleX, 10);
-	doc.text(subtitle, subtitleX, 17);
-
-	// Add table for all data
-	doc.autoTable({
-		head: [
-			[
-				"Name",
-				"Email",
-				"Position",
-				"License Number",
-				"Phone Number",
-				"Status",
-			],
-		],
-		body: formattedData,
-		startY: 20,
-		styles: { fontSize: 10 },
-	});
-
-	// Add a new page for Approved Veterinarians
-	doc.addPage();
-
-	// Page 2: Approved Veterinarians
-	const approvedSubtitle = "Approved Veterinarians";
-	const approvedSubtitleX =
-		(pageWidth - doc.getTextWidth(approvedSubtitle)) / 2;
-
-	// Add title for the second page
-	doc.text(title, titleX, 10);
-	doc.text(approvedSubtitle, approvedSubtitleX, 17);
-
-	// Add table for approved data
-	doc.autoTable({
-		head: [
-			[
-				"Name",
-				"Email",
-				"Position",
-				"License Number",
-				"Phone Number",
-				"Status",
-			],
-		],
-		body: approvedData,
-		startY: 20,
-		styles: { fontSize: 10 },
+		addSectionToPDF(doc, clinicTitle, statusSubtitle, statusData);
 	});
 
 	// Save the PDF

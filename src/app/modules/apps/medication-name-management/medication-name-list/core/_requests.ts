@@ -247,22 +247,11 @@ const exportToPDF = (data: MNames[]) => {
 
 	// Add a clinic title at the top
 	const clinicTitle = "San Jose City Veterinary Clinic";
-	const clinicSubtitle = "Medication Names";
-
-	// Calculate centered position for the clinic title
-	const pageWidth = doc.internal.pageSize.getWidth();
-	const titleX = (pageWidth - doc.getTextWidth(clinicTitle)) / 2;
-	const subtitleX = (pageWidth - doc.getTextWidth(clinicSubtitle)) / 2;
-
-	// Add centered clinic title
-	doc.setFontSize(14);
-	doc.text(clinicTitle, titleX, 10);
-	doc.setFontSize(10);
-	doc.text(clinicSubtitle, subtitleX, 17);
 
 	// Iterate through grouped data and create a table for each group
-	let startY = 25; // Initial Y position for the first table
-	Object.entries(groupedData).forEach(([sheetName, records]) => {
+	Object.entries(groupedData).forEach(([sheetName, records], index) => {
+		if (index > 0) doc.addPage(); // Add a new page for every table after the first
+
 		// Add section title for the group
 		let title = "";
 		if (sheetName === "All Medications") {
@@ -272,10 +261,12 @@ const exportToPDF = (data: MNames[]) => {
 			title = `All ${status} ${medType} Medications as of ${formattedDate} at ${formattedTime}`;
 		}
 
-		// Add the title for this section
+		// Add centered clinic title and section title
+		const pageWidth = doc.internal.pageSize.getWidth();
+		doc.setFontSize(14);
+		doc.text(clinicTitle, pageWidth / 2, 10, { align: "center" });
 		doc.setFontSize(12);
-		doc.text(title, 10, startY);
-		startY += 5;
+		doc.text(title, pageWidth / 2, 20, { align: "center" });
 
 		// Prepare table data
 		const tableData = records.map((item) => [item.Name, item.Status]);
@@ -284,18 +275,9 @@ const exportToPDF = (data: MNames[]) => {
 		doc.autoTable({
 			head: [["Name", "Status"]],
 			body: tableData,
-			startY,
+			startY: 30,
 			styles: { fontSize: 10 },
 		});
-
-		// Update startY for the next table
-		startY = doc.lastAutoTable.finalY + 10;
-
-		// Add a new page if necessary
-		if (startY > doc.internal.pageSize.height - 20) {
-			doc.addPage();
-			startY = 10;
-		}
 	});
 
 	// Save the PDF

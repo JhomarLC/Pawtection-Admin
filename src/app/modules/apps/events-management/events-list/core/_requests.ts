@@ -268,62 +268,53 @@ const exportToPDF = (data: Event[]) => {
 	// Create a new PDF document
 	const doc = new jsPDF();
 
-	// Add a centered title at the top of the document
-	const mainTitle = "San Jose City Veterinary Clinic";
-	const subTitle = "Event Report";
-	const pageWidth = doc.internal.pageSize.getWidth();
-	doc.setFontSize(16);
-	doc.text(mainTitle, pageWidth / 2, 10, { align: "center" });
-	doc.setFontSize(12);
-	doc.text(subTitle, pageWidth / 2, 17, { align: "center" });
-
 	// Function to add a title and a table for a specific section
 	const addSectionToPDF = (
+		doc: jsPDF,
 		title: string,
 		data: any[],
-		doc: jsPDF,
-		startY: number
+		isFirstPage: boolean
 	) => {
-		// Add title for the section
+		// Add a new page if this is not the first section
+		if (!isFirstPage) doc.addPage();
+
+		// Get page width for centering titles
+		const pageWidth = doc.internal.pageSize.getWidth();
+
+		// Add centered main title
+		doc.setFontSize(16);
+		doc.text("San Jose City Veterinary Clinic", pageWidth / 2, 10, {
+			align: "center",
+		});
 		doc.setFontSize(12);
-		doc.text(title, pageWidth / 2, startY, { align: "center" });
-		startY += 5;
+		doc.text("Event Report", pageWidth / 2, 17, { align: "center" });
+
+		// Add section title
+		doc.setFontSize(12);
+		doc.text(title, pageWidth / 2, 25, { align: "center" });
 
 		// Add table for the section
 		doc.autoTable({
 			head: [["Name", "Date Time", "Status", "Place", "Description"]],
 			body: data,
-			startY,
+			startY: 30,
 			styles: { fontSize: 10 },
 		});
-
-		// Return the updated Y position
-		return doc.lastAutoTable.finalY + 10;
 	};
 
-	// Add All Events section
-	let startY = 25;
-	startY = addSectionToPDF(
-		`All Events as of ${formattedNow}`,
-		allEvents,
+	// Add sections
+	addSectionToPDF(doc, `All Events as of ${formattedNow}`, allEvents, true); // First section uses default page
+	addSectionToPDF(
 		doc,
-		startY
-	);
-
-	// Add Upcoming Events section
-	startY = addSectionToPDF(
 		`Upcoming Events as of ${formattedNow}`,
 		upcomingEventsData,
-		doc,
-		startY
+		false
 	);
-
-	// Add Done Events section
-	startY = addSectionToPDF(
+	addSectionToPDF(
+		doc,
 		`Done Events as of ${formattedNow}`,
 		doneEventsData,
-		doc,
-		startY
+		false
 	);
 
 	// Save the PDF
