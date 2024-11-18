@@ -1,7 +1,7 @@
 import { useListView } from "../../core/ListViewProvider";
-import { PetownersListToolbar } from "./PetownersListToolbar";
 import { PetownersListGrouping } from "./PetownersListGrouping";
 import { PetownersListSearchComponent } from "./PetownersListSearchComponent";
+import { PetownersListToolbar } from "./PetownersListToolbar";
 
 const PetownersListHeader = () => {
 	const { selected } = useListView();

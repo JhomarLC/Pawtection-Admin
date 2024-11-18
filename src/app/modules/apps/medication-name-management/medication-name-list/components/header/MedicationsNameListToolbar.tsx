@@ -13,6 +13,7 @@ const MedicationsNameListToolbar = () => {
 	const users = useQueryResponseData();
 	const data = useMemo(() => users, [users]);
 
+	console.log(users, data);
 	return (
 		<div
 			className="d-flex justify-content-end"

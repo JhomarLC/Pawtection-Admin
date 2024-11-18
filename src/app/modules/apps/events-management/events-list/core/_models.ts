@@ -2,7 +2,7 @@ import { Response } from "../../../../../../_metronic/helpers";
 export type Event = {
 	id?: string;
 	name?: string | undefined;
-	date_time?: string;
+	date_time?: string | number | Date | undefined;
 	place?: string;
 	description?: string;
 	token?: string;

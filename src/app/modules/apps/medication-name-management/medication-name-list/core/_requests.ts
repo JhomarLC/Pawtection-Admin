@@ -56,68 +56,246 @@ const deleteSelectedUsers = (userIds: Array<ID>): Promise<void> => {
 	const requests = userIds.map((id) => axios.delete(`${USER_URL}/${id}`));
 	return axios.all(requests).then(() => {});
 };
-
-const exportToExcel = (data: MNames[]) => {
+const exportToExcel = (data: MNames[]): void => {
 	// Generate file name with current date and random number
 	const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 	const randomNum = Math.floor(Math.random() * 1000);
-	const fileName = `MedicationNames_${currentDate}_${randomNum}`;
-	console.log(data);
+	const fileName = `MedicationNames_${currentDate}_${randomNum}.xlsx`;
 
-	// Map data to a format suitable for Excel
-	const formattedData = data.map((user) => ({
-		Name: user.name,
-		Status: user.status,
+	// Group data by medtype.name and filter by status
+	const groupedData: Record<string, { Name: string; Status: string }[]> =
+		data.reduce((acc, item) => {
+			const medTypeName = item.medtype?.name || "Uncategorized";
+			const status = item.status || "Unknown";
+
+			// Create keys for active and inactive for each medType
+			const activeKey = `${medTypeName} - Active`;
+			const inactiveKey = `${medTypeName} - Inactive`;
+
+			// Group active medications
+			if (status === "Active") {
+				if (!acc[activeKey]) {
+					acc[activeKey] = [];
+				}
+				acc[activeKey].push({
+					Name: item.name,
+					Status: status,
+				});
+			}
+
+			// Group inactive medications
+			if (status === "Inactive") {
+				if (!acc[inactiveKey]) {
+					acc[inactiveKey] = [];
+				}
+				acc[inactiveKey].push({
+					Name: item.name,
+					Status: status,
+				});
+			}
+
+			return acc;
+		}, {} as Record<string, { Name: string; Status: string }[]>);
+
+	// Add "All Medications" sheet with both Active and Inactive
+	groupedData["All Medications"] = data.map((item) => ({
+		Name: item.name,
+		Status: item.status,
+		MedicationType: item.medtype?.name,
 	}));
 
-	// Create a new workbook and add a worksheet
+	// Create a new workbook
 	const workbook = XLSX.utils.book_new();
-	const worksheet = XLSX.utils.json_to_sheet(formattedData);
 
-	// Define column widths
-	worksheet["!cols"] = [
-		{ wpx: 150 }, // Name
-		{ wpx: 150 }, // Email
-	];
+	// Function to create a dynamic title for the top of each sheet
+	const addTitleAndDataToSheet = (
+		worksheet: XLSX.WorkSheet,
+		title: string,
+		headers: string[],
+		data: { [key: string]: string | undefined }[]
+	) => {
+		// Add title at A1
+		XLSX.utils.sheet_add_aoa(worksheet, [[title]], { origin: "A1" });
+		// Merge cells for the title row
+		worksheet["!merges"] = [
+			{ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } },
+		];
 
-	// Append the worksheet to the workbook
-	XLSX.utils.book_append_sheet(workbook, worksheet, "Medication Names");
+		// Add headers at A2
+		XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: "A2" });
+
+		// Add data starting from A3
+		XLSX.utils.sheet_add_json(worksheet, data, {
+			origin: "A3",
+			skipHeader: true,
+		});
+	};
+
+	// Iterate through grouped data and add a worksheet for each group
+	Object.entries(groupedData).forEach(([sheetName, records]) => {
+		const worksheet = XLSX.utils.json_to_sheet([]);
+
+		// Generate date and time for titles
+		const now = new Date();
+		const formattedDate = now.toLocaleString("en-PH", {
+			month: "long",
+			day: "2-digit",
+			year: "numeric",
+		});
+		const formattedTime = now.toLocaleString("en-PH", {
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: true,
+		});
+
+		// Determine dynamic title for each sheet
+		let title = "";
+		if (sheetName === "All Medications") {
+			title = `All Medications as of ${formattedDate} at ${formattedTime}`;
+		} else {
+			const [medType, status] = sheetName.split(" - ");
+			title = `All ${status} ${medType} Medications as of ${formattedDate} at ${formattedTime}`;
+		}
+
+		// Define headers
+		const headers = [
+			"Name",
+			"Status",
+			...(sheetName === "All Medications" ? ["MedicationType"] : []),
+		];
+
+		// Add title, headers, and data to worksheet
+		addTitleAndDataToSheet(worksheet, title, headers, records);
+
+		// Define column widths
+		worksheet["!cols"] = [
+			{ wpx: 150 }, // Name
+			{ wpx: 150 }, // Status
+			...(sheetName === "All Medications" ? [{ wpx: 150 }] : []), // MedicationType column for "All Medications"
+		];
+
+		// Append worksheet to workbook
+		XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+	});
 
 	// Write to an Excel file and trigger the download
-	XLSX.writeFile(workbook, `${fileName}.xlsx`);
+	XLSX.writeFile(workbook, fileName);
 };
-
 const exportToPDF = (data: MNames[]) => {
 	// Generate file name with current date and random number
 	const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 	const randomNum = Math.floor(Math.random() * 1000);
 	const fileName = `MedicationNames_${currentDate}_${randomNum}.pdf`;
 
-	// Map data to format suitable for PDF table
-	const formattedData = data.map((user) => [user.name, user.status]);
+	// Group data by medtype.name and filter by status
+	const groupedData: Record<string, { Name: string; Status: string }[]> =
+		data.reduce((acc, item) => {
+			const medTypeName = item.medtype?.name || "Uncategorized";
+			const status = item.status || "Unknown";
+
+			// Create keys for active and inactive for each medType
+			const activeKey = `${medTypeName} - Active`;
+			const inactiveKey = `${medTypeName} - Inactive`;
+
+			// Group active medications
+			if (status === "Active") {
+				if (!acc[activeKey]) {
+					acc[activeKey] = [];
+				}
+				acc[activeKey].push({
+					Name: item.name,
+					Status: status,
+				});
+			}
+
+			// Group inactive medications
+			if (status === "Inactive") {
+				if (!acc[inactiveKey]) {
+					acc[inactiveKey] = [];
+				}
+				acc[inactiveKey].push({
+					Name: item.name,
+					Status: status,
+				});
+			}
+
+			return acc;
+		}, {} as Record<string, { Name: string; Status: string }[]>);
+
+	// Add "All Medications" to grouped data
+	groupedData["All Medications"] = data.map((item) => ({
+		Name: item.name,
+		Status: item.status,
+		MedicationType: item.medtype?.name,
+	}));
 
 	// Create a new PDF document
 	const doc = new jsPDF();
 
-	// Set title text
-	const title = "San Jose City Veterinary Clinic";
-	const subtitle = "Medication Names";
+	// Generate date and time for titles
+	const now = new Date();
+	const formattedDate = now.toLocaleString("en-PH", {
+		month: "long",
+		day: "2-digit",
+		year: "numeric",
+	});
+	const formattedTime = now.toLocaleString("en-PH", {
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: true,
+	});
 
-	// Calculate centered position for the title
+	// Add a clinic title at the top
+	const clinicTitle = "San Jose City Veterinary Clinic";
+	const clinicSubtitle = "Medication Names";
+
+	// Calculate centered position for the clinic title
 	const pageWidth = doc.internal.pageSize.getWidth();
-	const titleX = (pageWidth - doc.getTextWidth(title)) / 2;
-	const subtitleX = (pageWidth - doc.getTextWidth(subtitle)) / 2;
+	const titleX = (pageWidth - doc.getTextWidth(clinicTitle)) / 2;
+	const subtitleX = (pageWidth - doc.getTextWidth(clinicSubtitle)) / 2;
 
-	// Add centered title
-	doc.text(title, titleX, 10); // Adjust the y-position (10) as needed
-	doc.text(subtitle, subtitleX, 17); // Adjust the y-position (10) as needed
+	// Add centered clinic title
+	doc.setFontSize(14);
+	doc.text(clinicTitle, titleX, 10);
+	doc.setFontSize(10);
+	doc.text(clinicSubtitle, subtitleX, 17);
 
-	// Add table to PDF
-	doc.autoTable({
-		head: [["Name", "Status"]],
-		body: formattedData,
-		startY: 20,
-		styles: { fontSize: 10 },
+	// Iterate through grouped data and create a table for each group
+	let startY = 25; // Initial Y position for the first table
+	Object.entries(groupedData).forEach(([sheetName, records]) => {
+		// Add section title for the group
+		let title = "";
+		if (sheetName === "All Medications") {
+			title = `All Medications as of ${formattedDate} at ${formattedTime}`;
+		} else {
+			const [medType, status] = sheetName.split(" - ");
+			title = `All ${status} ${medType} Medications as of ${formattedDate} at ${formattedTime}`;
+		}
+
+		// Add the title for this section
+		doc.setFontSize(12);
+		doc.text(title, 10, startY);
+		startY += 5;
+
+		// Prepare table data
+		const tableData = records.map((item) => [item.Name, item.Status]);
+
+		// Add the table for this group
+		doc.autoTable({
+			head: [["Name", "Status"]],
+			body: tableData,
+			startY,
+			styles: { fontSize: 10 },
+		});
+
+		// Update startY for the next table
+		startY = doc.lastAutoTable.finalY + 10;
+
+		// Add a new page if necessary
+		if (startY > doc.internal.pageSize.height - 20) {
+			doc.addPage();
+			startY = 10;
+		}
 	});
 
 	// Save the PDF
