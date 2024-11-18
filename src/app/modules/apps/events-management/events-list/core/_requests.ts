@@ -272,7 +272,7 @@ const exportToPDF = (data: Event[]) => {
 	const addSectionToPDF = (
 		doc: jsPDF,
 		title: string,
-		data: any[],
+		data: unknown[],
 		isFirstPage: boolean
 	) => {
 		// Add a new page if this is not the first section

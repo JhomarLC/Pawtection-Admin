@@ -55,7 +55,10 @@ const eventsColumns: ReadonlyArray<Column<MType>> = [
 		),
 		id: "actions",
 		Cell: ({ ...props }) => (
-			<MedicationsTypeActionsCell id={props.data[props.row.index].id} />
+			<MedicationsTypeActionsCell
+				id={props.data[props.row.index].id}
+				mtype={props.data[props.row.index]}
+			/>
 		),
 	},
 ];

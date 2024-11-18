@@ -1,4 +1,4 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { MenuComponent } from "../../../../../../../_metronic/assets/ts/components";
 import { KTIcon, QUERIES } from "../../../../../../../_metronic/helpers";
@@ -6,21 +6,48 @@ import { useListView } from "../../core/ListViewProvider";
 import { useQueryResponse } from "../../core/QueryResponseProvider";
 import { deleteMType } from "../../core/_requests";
 import { useNavigate } from "react-router-dom";
+import { MType } from "../../core/_models";
 
 type Props = {
 	id: string | undefined;
+	mtype: MType;
 };
 
-const MedicationsTypeActionsCell: FC<Props> = ({ id }) => {
+const MedicationsTypeActionsCell: FC<Props> = ({ id, mtype }) => {
 	const navigate = useNavigate();
 
 	const { setItemIdForUpdate } = useListView();
 	const { query } = useQueryResponse();
 	const queryClient = useQueryClient();
 
+	// State to track whether the delete option should be shown
+	const [showDelete, setShowDelete] = useState(false);
 	useEffect(() => {
+		// Function to check and update the delete visibility
+		const checkDeleteVisibility = () => {
+			const createdAt = new Date(mtype.created_at);
+			const currentTime = new Date();
+			const timeDiff =
+				(currentTime.getTime() - createdAt.getTime()) / (1000 * 60); // Convert to minutes
+
+			// Update the state based on the time difference
+			setShowDelete(timeDiff <= 10);
+		};
+
+		// Initial check
+		checkDeleteVisibility();
+
+		// Set up an interval to check every 1 minute
+		const interval = setInterval(checkDeleteVisibility, 60000);
+
+		// Clean up the interval on component unmount
+		return () => clearInterval(interval);
+	}, [mtype.created_at]);
+
+	useEffect(() => {
+		// Reinitialize the menu whenever the component updates
 		MenuComponent.reinitialization();
-	}, []);
+	}, [showDelete]);
 
 	const openEditModal = () => {
 		setItemIdForUpdate(id);
@@ -73,15 +100,17 @@ const MedicationsTypeActionsCell: FC<Props> = ({ id }) => {
 				{/* end::Menu item */}
 
 				{/* begin::Menu item */}
-				<div className="menu-item px-3">
-					<a
-						className="menu-link px-3"
-						data-kt-users-table-filter="delete_row"
-						onClick={async () => await deleteItem.mutateAsync()}
-					>
-						Delete
-					</a>
-				</div>
+				{showDelete && (
+					<div className="menu-item px-3">
+						<a
+							className="menu-link px-3"
+							data-kt-users-table-filter="delete_row"
+							onClick={async () => await deleteItem.mutateAsync()}
+						>
+							Delete
+						</a>
+					</div>
+				)}
 				{/* end::Menu item */}
 			</div>
 			{/* end::Menu */}

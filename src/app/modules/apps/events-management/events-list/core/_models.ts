@@ -6,6 +6,7 @@ export type Event = {
 	place?: string;
 	description?: string;
 	token?: string;
+	created_at?: string | number | Date | undefined;
 };
 
 export type UsersQueryResponse = Response<Array<Event>>;

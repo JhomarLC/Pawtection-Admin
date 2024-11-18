@@ -3,6 +3,7 @@ export type MType = {
 	id?: string;
 	name?: string;
 	status?: string;
+	created_at?: string | number | Date | undefined;
 };
 
 export type UsersQueryResponse = Response<Array<MType>>;

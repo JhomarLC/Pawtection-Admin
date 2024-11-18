@@ -34,7 +34,7 @@ const eventsColumns: ReadonlyArray<Column<MNames>> = [
 		Header: (props) => (
 			<MedicationsNameCustomHeader
 				tableProps={props}
-				title="Name"
+				title="Status"
 				className="min-w-125px"
 			/>
 		),
@@ -55,7 +55,10 @@ const eventsColumns: ReadonlyArray<Column<MNames>> = [
 		),
 		id: "actions",
 		Cell: ({ ...props }) => (
-			<MedicationsNameActionsCell id={props.data[props.row.index].id} />
+			<MedicationsNameActionsCell
+				id={props.data[props.row.index].id}
+				mnames={props.data[props.row.index]}
+			/>
 		),
 	},
 ];

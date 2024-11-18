@@ -74,7 +74,35 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 			setSubmitting(true);
 			try {
 				if (isNotEmpty(values.id)) {
+					const res = await getNotificationTokens("");
 					await updateEvent(values);
+
+					if (res && res.data) {
+						for (const user of res.data) {
+							const notification: Notif = {
+								to: user.token,
+								title: "Attention, Event Updated",
+								body: `Event "${values.name}" is now scheduled at ${values.place} on ${values.date_time}.`,
+							};
+							// Send the notification using axios
+							await axios.post(
+								"http://192.168.100.86:8080/api/send-notif",
+								notification,
+								{
+									headers: {
+										Accept: "application/json",
+										"Accept-encoding": "gzip, deflate",
+										"Content-Type": "application/json",
+									},
+								}
+							);
+							console.log(
+								`Notification sent to token: ${notification.to}`
+							);
+						}
+					} else {
+						console.log("No tokens found in response.");
+					}
 				} else {
 					const res = await getNotificationTokens("");
 					await createEvent(values);
