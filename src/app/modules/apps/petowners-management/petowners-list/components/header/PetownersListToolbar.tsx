@@ -110,7 +110,7 @@ const PetownersListToolbar = () => {
 		try {
 			// Make the API request
 			const response = await axios.get<PetOwner[]>(
-				"http://192.168.100.86:8080/api/petowners-all-data" // Replace with your actual API URL
+				`${import.meta.env.VITE_APP_API_URL}/petowners-all-data` // Replace with your actual API URL
 			);
 
 			// Return the data as is

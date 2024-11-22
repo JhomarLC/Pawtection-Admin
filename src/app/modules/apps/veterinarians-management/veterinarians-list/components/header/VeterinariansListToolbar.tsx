@@ -2,14 +2,9 @@ import { useMemo } from "react";
 import { KTIcon } from "../../../../../../../_metronic/helpers";
 import { useQueryResponseData } from "../../core/QueryResponseProvider";
 import { exportToExcel, exportToPDF } from "../../core/_requests";
-// import {useListView} from '../../core/ListViewProvider'
-// import {VeterinariansListFilter} from './VeterinariansListFilter'
+import { VeterinariansListFilter } from "./VeterinariansListFilter";
 
 const VeterinariansListToolbar = () => {
-	// const {setItemIdForUpdate} = useListView()
-	// // const openAddUserModal = () => {
-	// //   setItemIdForUpdate(null)
-	// // }
 	const users = useQueryResponseData();
 	const data = useMemo(() => users, [users]);
 
@@ -18,7 +13,7 @@ const VeterinariansListToolbar = () => {
 			className="d-flex justify-content-end"
 			data-kt-user-table-toolbar="base"
 		>
-			{/* <VeterinariansListFilter /> */}
+			<VeterinariansListFilter />
 
 			{/* begin::Export */}
 			<button

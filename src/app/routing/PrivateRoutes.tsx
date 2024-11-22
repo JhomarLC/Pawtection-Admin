@@ -46,7 +46,7 @@ const PrivateRoutes = () => {
 					}
 				/>
 				<Route
-					path="pets/:petId/medications/*"
+					path="petowners/pets/:petId/medications/*"
 					element={
 						<SuspensedView>
 							<PetMedicationsPage />

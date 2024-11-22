@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FC, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 import { MenuComponent } from "../../../../../../../_metronic/assets/ts/components";
@@ -5,10 +6,15 @@ import { MenuComponent } from "../../../../../../../_metronic/assets/ts/componen
 import { KTIcon, QUERIES } from "../../../../../../../_metronic/helpers";
 import { useListView } from "../../core/ListViewProvider";
 import { useQueryResponse } from "../../core/QueryResponseProvider";
-import { deleteUser, getNotificationTokens } from "../../core/_requests";
+import {
+	deleteUser,
+	getNotificationTokens,
+	getVetNotificationTokens,
+} from "../../core/_requests";
 import { Event } from "../../core/_models";
 import axios from "axios";
 // import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
 type Props = {
 	id: string | undefined;
@@ -39,6 +45,66 @@ const EventActionsCell: FC<Props> = ({ id, event }) => {
 		eventDateTime && eventDateTime.getTime() > currentDateTime.getTime()
 			? "Upcoming"
 			: "Done";
+	// Function to save notification to history
+	async function saveNotificationToHistory(notification: Notif) {
+		const apiUrl = `${
+			import.meta.env.VITE_APP_API_URL
+		}/notification-history`;
+
+		try {
+			// Send POST request to save the notification in the database
+			const response = await axios.post(
+				apiUrl,
+				{
+					title: notification.title,
+					description: notification.body,
+					action: "reminder",
+				},
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+				}
+			);
+
+			console.log(`Notification saved to history: ${response.data}`);
+		} catch (error) {
+			console.error("Failed to save notification to history:", error);
+		}
+	}
+	async function sendNotificationBatch(users: any[], event: any) {
+		const apiUrl = `${import.meta.env.VITE_APP_API_URL}/send-notif`;
+
+		for (const user of users) {
+			const notification: Notif = {
+				to: user.token,
+				title: "Attention for Upcoming Event",
+				body: `Event "${event.name}" is scheduled at ${
+					event.place
+				} on ${format(
+					new Date(event.date_time),
+					"EEEE, MMMM do, yyyy h:mm a"
+				)}.`,
+			};
+
+			try {
+				await axios.post(apiUrl, notification, {
+					headers: {
+						Accept: "application/json",
+						"Accept-encoding": "gzip, deflate",
+						"Content-Type": "application/json",
+					},
+				});
+				await saveNotificationToHistory(notification);
+				console.log(`Notification sent to token: ${notification.to}`);
+			} catch (error) {
+				console.error(
+					`Failed to send notification to token: ${notification.to}`,
+					error
+				);
+			}
+		}
+	}
 
 	useEffect(() => {
 		const checkDeleteVisibility = () => {
@@ -90,35 +156,26 @@ const EventActionsCell: FC<Props> = ({ id, event }) => {
 
 		try {
 			const res = await getNotificationTokens("");
+			const res_vet = await getVetNotificationTokens("approved");
 
-			if (res && res.data) {
-				for (const user of res.data) {
-					const notification: Notif = {
-						to: user.token,
-						title: "Attention for Upcoming Event",
-						body: `Event "${event.name}" is scheduled at ${event.place} on ${event.date_time}.`,
-					};
-					// Send the notification using axios
-					await axios.post(
-						"http://192.168.100.86:8080/api/send-notif",
-						notification,
-						{
-							headers: {
-								Accept: "application/json",
-								"Accept-encoding": "gzip, deflate",
-								"Content-Type": "application/json",
-							},
-						}
-					);
-					console.log(
-						`Notification sent to token: ${notification.to}`
-					);
-				}
+			if (res_vet && res_vet.data && res_vet.data.length > 0) {
+				console.log("Sending notifications to vet users...");
+				await sendNotificationBatch(res_vet.data, event);
 			} else {
-				console.log("No tokens found in response.");
+				console.log("No vet tokens found in response.");
+			}
+
+			if (res && res.data && res.data.length > 0) {
+				console.log("Sending notifications to regular users...");
+				await sendNotificationBatch(res.data, event);
+			} else {
+				console.log("No regular tokens found in response.");
 			}
 		} catch (error) {
-			console.error("Error sending notifications:", error);
+			console.error(
+				"Error occurred while fetching tokens or sending notifications:",
+				error
+			);
 		}
 	};
 
@@ -173,7 +230,7 @@ const EventActionsCell: FC<Props> = ({ id, event }) => {
 						onClick={handleNotifyPetOwners}
 					>
 						<KTIcon iconName="notification" className="fs-5 m-0" />
-						Notify Pet Owners
+						Notify Users
 					</button>
 				</>
 			)}

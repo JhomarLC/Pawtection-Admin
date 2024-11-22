@@ -9,12 +9,13 @@ import { EventsListLoading } from "../components/loading/EventsListLoading";
 import {
 	createEvent,
 	getNotificationTokens,
-	// pushNotif,
+	getVetNotificationTokens,
 	updateEvent,
 } from "../core/_requests";
 import { useQueryResponse } from "../core/QueryResponseProvider";
 import { parse } from "date-fns/parse";
 import axios from "axios";
+import { format } from "date-fns";
 
 type Props = {
 	isUserLoading: boolean;
@@ -26,6 +27,8 @@ type Notif = {
 	title?: string | undefined;
 	body?: string;
 };
+
+// Validation Schema
 const editUserSchema = Yup.object().shape({
 	name: Yup.string()
 		.min(3, "Minimum 3 characters")
@@ -47,6 +50,80 @@ const editUserSchema = Yup.object().shape({
 		.max(50, "Maximum 50 symbols")
 		.required("Place is required"),
 });
+async function saveNotificationToHistory(
+	title: string,
+	body: string,
+	action: string
+) {
+	const apiUrl = `${import.meta.env.VITE_APP_API_URL}/notification-history`;
+
+	try {
+		const response = await axios.post(
+			apiUrl,
+			{
+				title: title,
+				description: body,
+				action: action,
+			},
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		);
+
+		console.log(`Notification saved to history: ${response.data}`);
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			console.error("Error response from server:", {
+				status: error.response?.status,
+				data: error.response?.data,
+			});
+		} else {
+			console.error("Unexpected error:", error);
+		}
+	}
+}
+
+// Function to send notifications
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sendNotifications = async (
+	users: any[],
+	title: string,
+	body: string,
+	action: string
+) => {
+	if (!users || users.length === 0) {
+		console.log("No tokens found in response.");
+		return;
+	}
+	const notifications = users.map((user) => {
+		const notification: Notif = {
+			to: user.token,
+			title,
+			body,
+		};
+
+		return axios.post(
+			`${import.meta.env.VITE_APP_API_URL}/send-notif`,
+			notification,
+			{
+				headers: {
+					Accept: "application/json",
+					"Accept-encoding": "gzip, deflate",
+					"Content-Type": "application/json",
+				},
+			}
+		);
+	});
+
+	try {
+		await Promise.all(notifications);
+		console.log("Notifications sent successfully.");
+	} catch (error) {
+		console.error("Error sending notifications:", error);
+	}
+};
 
 const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 	const { setItemIdForUpdate } = useListView();
@@ -72,72 +149,51 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 		validationSchema: editUserSchema,
 		onSubmit: async (values, { setSubmitting }) => {
 			setSubmitting(true);
+
 			try {
+				const [tokensRes, vetTokensRes] = await Promise.all([
+					getNotificationTokens(""),
+					getVetNotificationTokens("approved"),
+				]);
+
+				const title = isNotEmpty(values.id)
+					? "Attention, Event Updated"
+					: "New Event Created";
+
+				const action = isNotEmpty(values.id) ? "edit" : "add";
+
+				const body = `Event "${values.name}" is ${
+					isNotEmpty(values.id) ? "now scheduled" : "scheduled"
+				} at ${values.place} on ${format(
+					new Date(values.date_time),
+					"EEEE, MMMM do, yyyy h:mm a"
+				)}.`;
+
 				if (isNotEmpty(values.id)) {
-					const res = await getNotificationTokens("");
 					await updateEvent(values);
-
-					if (res && res.data) {
-						for (const user of res.data) {
-							const notification: Notif = {
-								to: user.token,
-								title: "Attention, Event Updated",
-								body: `Event "${values.name}" is now scheduled at ${values.place} on ${values.date_time}.`,
-							};
-							// Send the notification using axios
-							await axios.post(
-								"http://192.168.100.86:8080/api/send-notif",
-								notification,
-								{
-									headers: {
-										Accept: "application/json",
-										"Accept-encoding": "gzip, deflate",
-										"Content-Type": "application/json",
-									},
-								}
-							);
-							console.log(
-								`Notification sent to token: ${notification.to}`
-							);
-						}
-					} else {
-						console.log("No tokens found in response.");
-					}
 				} else {
-					const res = await getNotificationTokens("");
 					await createEvent(values);
-
-					if (res && res.data) {
-						for (const user of res.data) {
-							const notification: Notif = {
-								to: user.token,
-								title: "New Event Created",
-								body: `Event "${values.name}" is scheduled at ${values.place} on ${values.date_time}.`,
-							};
-							// Send the notification using axios
-							await axios.post(
-								"http://192.168.100.86:8080/api/send-notif",
-								notification,
-								{
-									headers: {
-										Accept: "application/json",
-										"Accept-encoding": "gzip, deflate",
-										"Content-Type": "application/json",
-									},
-								}
-							);
-							console.log(
-								`Notification sent to token: ${notification.to}`
-							);
-						}
-					} else {
-						console.log("No tokens found in response.");
-					}
 				}
+				await saveNotificationToHistory(title, body, action);
+				// Send notifications concurrently
+				await Promise.all([
+					sendNotifications(
+						tokensRes?.data || [],
+						title,
+						body,
+						action
+					),
+					sendNotifications(
+						vetTokensRes?.data || [],
+						title,
+						body,
+						action
+					),
+				]);
 			} catch (ex) {
 				console.error(ex);
 			} finally {
-				setSubmitting(true);
+				setSubmitting(false);
 				cancel(true);
 			}
 		},
@@ -151,7 +207,7 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 				onSubmit={formik.handleSubmit}
 				noValidate
 			>
-				{/* begin::Scroll */}
+				{/* Form Inputs */}
 				<div
 					className="d-flex flex-column scroll-y me-n7 pe-7"
 					id="kt_modal_add_user_scroll"
@@ -162,15 +218,10 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 					data-kt-scroll-wrappers="#kt_modal_add_user_scroll"
 					data-kt-scroll-offset="300px"
 				>
-					{/* begin::Input group */}
 					<div className="fv-row mb-7">
-						{/* begin::Label */}
 						<label className="required fw-bold fs-6 mb-2">
 							Event Name
 						</label>
-						{/* end::Label */}
-
-						{/* begin::Input */}
 						<input
 							placeholder="Event name"
 							{...formik.getFieldProps("name")}
@@ -201,18 +252,12 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 								</div>
 							</div>
 						)}
-						{/* end::Input */}
 					</div>
-					{/* end::Input group */}
-					{/* begin::Input group */}
+
 					<div className="fv-row mb-7">
-						{/* begin::Label */}
 						<label className="required fw-bold fs-6 mb-2">
 							Date Time
 						</label>
-						{/* end::Label */}
-
-						{/* begin::Input */}
 						<input
 							placeholder="Date Time"
 							{...formik.getFieldProps("date_time")}
@@ -243,19 +288,12 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 								</div>
 							</div>
 						)}
-						{/* end::Input */}
 					</div>
-					{/* end::Input group */}
 
-					{/* begin::Input group */}
 					<div className="fv-row mb-7">
-						{/* begin::Label */}
 						<label className="required fw-bold fs-6 mb-2">
 							Place
 						</label>
-						{/* end::Label */}
-
-						{/* begin::Input */}
 						<input
 							placeholder="Place"
 							{...formik.getFieldProps("place")}
@@ -287,15 +325,9 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 							</div>
 						)}
 					</div>
-					{/* end::Input group */}
 
-					{/* begin::Input group */}
 					<div className="fv-row mb-7">
-						{/* begin::Label */}
 						<label className="fw-bold fs-6 mb-2">Description</label>
-						{/* end::Label */}
-
-						{/* begin::Input */}
 						<input
 							placeholder="Description"
 							{...formik.getFieldProps("description")}
@@ -327,11 +359,9 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 							</div>
 						)}
 					</div>
-					{/* end::Input group */}
 				</div>
-				{/* end::Scroll */}
 
-				{/* begin::Actions */}
+				{/* Actions */}
 				<div className="text-center pt-15">
 					<button
 						type="reset"
@@ -363,7 +393,6 @@ const EventEditModalForm: FC<Props> = ({ event, isUserLoading }) => {
 						)}
 					</button>
 				</div>
-				{/* end::Actions */}
 			</form>
 			{(formik.isSubmitting || isUserLoading) && <EventsListLoading />}
 		</>

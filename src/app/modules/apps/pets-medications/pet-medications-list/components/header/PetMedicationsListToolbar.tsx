@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { KTIcon } from "../../../../../../../_metronic/helpers";
 import { Button } from "react-bootstrap";
+import { PetMedicationsListFilter } from "./PetMedicationsListFilter";
 // import { useListView } from "../../core/ListViewProvider";
 // import { PetListFilter } from "./PetListFilter";
 
@@ -16,7 +17,7 @@ const PetMedicationsListToolbar = () => {
 			className="d-flex justify-content-end"
 			data-kt-user-table-toolbar="base"
 		>
-			{/* <PetListFilter /> */}
+			<PetMedicationsListFilter />
 
 			{/* begin::Export */}
 			{/* <button type="button" className="btn btn-light-primary me-3">

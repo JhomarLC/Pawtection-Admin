@@ -40,7 +40,7 @@ const PetMedicationsPage = () => {
 					element={
 						<>
 							<PageTitle breadcrumbs={usersBreadcrumbs}>
-								Pet Lists
+								Pet Medications
 							</PageTitle>
 							<PetListWrapper />
 						</>

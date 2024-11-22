@@ -7,7 +7,7 @@ import {
 	useQueryResponseLoading,
 } from "../core/QueryResponseProvider";
 import { petMedicationsColumns } from "./columns/_columns";
-import { Pet } from "../core/_models";
+import { Pet, PetMed } from "../core/_models";
 import { PetMedicationsListPagination } from "../components/pagination/PetMedicationsListPagination";
 import { KTCardBody } from "../../../../../../_metronic/helpers";
 import { PetMedicationsListLoading } from "../components/loading/PetMedicationsListLoading";
@@ -34,7 +34,7 @@ const PetMedicationsTable = () => {
 				>
 					<thead>
 						<tr className="text-start text-muted fw-bolder fs-7 text-uppercase gs-0">
-							{headers.map((column: ColumnInstance<Pet>) => (
+							{headers.map((column: ColumnInstance<PetMed>) => (
 								<CustomHeaderColumn
 									key={column.id}
 									column={column}
@@ -47,7 +47,7 @@ const PetMedicationsTable = () => {
 						{...getTableBodyProps()}
 					>
 						{rows.length > 0 ? (
-							rows.map((row: Row<Pet>, i) => {
+							rows.map((row: Row<PetMed>, i) => {
 								prepareRow(row);
 								return (
 									<CustomRow

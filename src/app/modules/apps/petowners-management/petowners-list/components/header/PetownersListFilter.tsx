@@ -10,21 +10,24 @@ import { MenuComponent } from "../../../../../../../_metronic/assets/ts/componen
 const PetownersListFilter = () => {
 	const { updateState } = useQueryRequest();
 	const { isLoading } = useQueryResponse();
-	const [brgy, setBrgy] = useState<string | undefined>();
+	const [brgy, setBrgy] = useState<string>("");
 
 	useEffect(() => {
 		MenuComponent.reinitialization();
 	}, []);
+
 	const resetData = () => {
-		updateState({ filter: undefined, ...initialQueryState });
+		updateState({ search: undefined, ...initialQueryState });
+		setBrgy("");
 	};
 
 	const filterData = () => {
 		updateState({
-			filter: brgy,
+			search: brgy,
 			...initialQueryState,
 		});
 	};
+
 	return (
 		<>
 			{/* begin::Filter Button */}
@@ -70,10 +73,12 @@ const PetownersListFilter = () => {
 							data-allow-clear="true"
 							data-kt-user-table-filter="brgy"
 							data-hide-search="true"
-							onChange={(e) => setBrgy(e.target.value)}
+							onChange={(e) => {
+								setBrgy(e.target.value);
+							}}
 							value={brgy}
 						>
-							<option value=""></option>
+							<option value="">All Barangay</option>
 							<option value="A. Pascual">A. Pascual</option>
 							<option value="Abar Ist">Abar Ist</option>
 							<option value="Abar 2nd">Abar 2nd</option>

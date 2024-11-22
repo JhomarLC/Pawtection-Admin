@@ -1,73 +1,124 @@
+import React, { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { PageTitle } from "../../../_metronic/layout/core";
-import {
-	MixedWidget10,
-	StatisticsWidget5,
-} from "../../../_metronic/partials/widgets";
+import { StatisticsWidget5 } from "../../../_metronic/partials/widgets";
+import { MixedWidget10 } from "../../../_metronic/partials/widgets/mixed/MixedWidget10";
 import { MixedWidget16 } from "../../../_metronic/partials/widgets/mixed/MixedWidget16";
 import { MixedWidget17 } from "../../../_metronic/partials/widgets/mixed/MixedWidget17";
+import axios, { AxiosResponse } from "axios";
 
-const DashboardPage = () => (
-	<>
-		{/* begin::Row */}
+// Define API response interfaces
+interface VeterinariansResponse {
+	filtered_count: number;
+	[key: string]: unknown;
+}
+
+interface Event {
+	date_time: string;
+	[key: string]: unknown;
+}
+
+const DashboardWrapper = () => {
+	const intl = useIntl();
+	const [actiVets, setActivets] = useState<number>(0);
+	const [eventCount, setEventCount] = useState<number>(0);
+	const [loading, setLoading] = useState<boolean>(true); // Loading state
+
+	const getDashboardData = async () => {
+		setLoading(true); // Start loading
+		try {
+			const response: AxiosResponse<VeterinariansResponse> =
+				await axios.get(
+					`${
+						import.meta.env.VITE_APP_API_URL
+					}/veterinarians?status=approved`
+				);
+			setActivets(response.data.filtered_count || 0);
+
+			const eventResponse: AxiosResponse<{ data: Event[] }> =
+				await axios.get(`${import.meta.env.VITE_APP_API_URL}/events`);
+			const now = new Date();
+			const upcomingEvents = eventResponse.data.data.filter(
+				(event) => new Date(event.date_time) > now
+			);
+			setEventCount(upcomingEvents.length);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		} finally {
+			setLoading(false); // End loading
+		}
+	};
+
+	useEffect(() => {
+		getDashboardData();
+	}, []);
+
+	return (
+		<>
+			<PageTitle breadcrumbs={[]}>
+				{intl.formatMessage({ id: "MENU.DASHBOARD" })}
+			</PageTitle>
+
+			<div className="row g-5 g-xl-8">
+				<div className="col-xl-4">
+					<StatisticsWidget5
+						className="card-xl-stretch mb-xl-8"
+						svgIcon="user"
+						color="body-white"
+						iconColor="primary"
+						title="Veterinarians"
+						description="All active Veterinarians"
+						titleColor="gray-900"
+						descriptionColor="gray-400"
+						count={actiVets || 0}
+					/>
+				</div>
+
+				<div className="col-xl-4">
+					<StatisticsWidget5
+						className="card-xl-stretch mb-xl-8"
+						svgIcon="calendar"
+						color="primary"
+						iconColor="white"
+						title="Events"
+						description="Upcoming events in San Jose City"
+						titleColor="white"
+						descriptionColor="white"
+						count={eventCount || 0}
+					/>
+				</div>
+			</div>
+
+			{/* MixedWidgets Section */}
+			<MixedWidgets loading={loading} />
+		</>
+	);
+};
+
+const MixedWidgets = React.memo(({ loading }: { loading: boolean }) => {
+	if (loading) {
+		return (
+			<div className="text-center mt-10">
+				<button type="button" className="btn btn-primary" disabled>
+					<span className="indicator-label">Loading...</span>
+					<span className="indicator-progress">
+						Please wait...{" "}
+						<span className="spinner-border spinner-border-sm align-middle ms-2"></span>
+					</span>
+				</button>
+			</div>
+		);
+	}
+
+	return (
 		<div className="row g-5 g-xl-8">
-			<div className="col-xl-4">
-				<StatisticsWidget5
-					className="card-xl-stretch mb-xl-8"
-					svgIcon="user"
-					color="body-white"
-					iconColor="primary"
-					title="Veterinarians"
-					description="All active Veterinarians"
-					titleColor="gray-900"
-					descriptionColor="gray-400"
-					count={14}
-				/>
-			</div>
-
-			<div className="col-xl-4">
-				<StatisticsWidget5
-					className="card-xl-stretch mb-xl-8"
-					svgIcon="calendar"
-					color="primary"
-					iconColor="white"
-					title="Events"
-					description="Upcoming events in San Jose City"
-					titleColor="white"
-					descriptionColor="white"
-					count={3}
-				/>
-			</div>
-
-			<div className="col-xl-4">
-				{/* <StatisticsWidget5
-					className="card-xl-stretch mb-5 mb-xl-8"
-					svgIcon="left"
-					color="dark"
-					iconColor="gray-100"
-					title="Sales Stats"
-					description="50% Increased for FY20"
-					titleColor="gray-100"
-					descriptionColor="gray-100"
-				/> */}
-			</div>
-		</div>
-		{/* end::Row */}
-
-		{/* begin::Row */}
-		<div className="row g-5 g-xl-8">
-			{/* begin::Col */}
 			<div className="col-xl-4">
 				<MixedWidget10
 					className="card-xl-stretch-100 mb-xl-8"
 					chartColor="primary"
 					chartHeight="100px"
 				/>
-				{/* <ListsWidget1 className="card-xl-stretch mb-xl-8" /> */}
 			</div>
-			{/* end::Col */}
-
-			{/* begin::Col */}
 			<div className="col-xl-4">
 				<MixedWidget16
 					className="card-xl-stretch-100 mb-xl-8"
@@ -75,9 +126,6 @@ const DashboardPage = () => (
 					chartHeight="100px"
 				/>
 			</div>
-			{/* end::Col */}
-
-			{/* begin::Col */}
 			<div className="col-xl-4">
 				<MixedWidget17
 					className="card-xl-stretch-100 mb-xl-8"
@@ -85,21 +133,8 @@ const DashboardPage = () => (
 					chartHeight="100px"
 				/>
 			</div>
-			{/* end::Col */}
 		</div>
-	</>
-);
-
-const DashboardWrapper = () => {
-	const intl = useIntl();
-	return (
-		<>
-			<PageTitle breadcrumbs={[]}>
-				{intl.formatMessage({ id: "MENU.DASHBOARD" })}
-			</PageTitle>
-			<DashboardPage />
-		</>
 	);
-};
+});
 
 export { DashboardWrapper };

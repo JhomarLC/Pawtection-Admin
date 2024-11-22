@@ -27,17 +27,9 @@ const PetActionsCell: FC<Props> = ({ id }) => {
 		setItemIdForUpdate(id);
 	};
 
-	// const deleteItem = useMutation(() => deleteUser(id), {
-	// 	// 💡 response of the mutation is passed to onSuccess
-	// 	onSuccess: () => {
-	// 		// ✅ update detail view directly
-	// 		queryClient.invalidateQueries([`${QUERIES.USERS_LIST}-${query}`]);
-	// 	},
-	// });
-
 	const viewMedications = (id: string | undefined) => {
 		if (id) {
-			navigate(`/pets/${id}/medications`);
+			navigate(`/petowners/pets/${id}/medications`);
 		} else {
 			console.log("No ID provided");
 		}

@@ -6,6 +6,7 @@ const API_URL = import.meta.env.VITE_APP_THEME_API_URL;
 const USER_URL = `${API_URL}/events`;
 const GET_USERS_URL = `${API_URL}/events`;
 const GET_BY_ADDRESS = `${API_URL}/notification/by-address`;
+const GET_BY_ADDRESS_VET = `${API_URL}/vet-notification/by-address`;
 const PUSH_URL_NOTIF = "https://exp.host/--/api/v2/push/send";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -25,6 +26,13 @@ const getEvents = (query: string): Promise<UsersQueryResponse> => {
 const getNotificationTokens = (query: string): Promise<UsersQueryResponse> => {
 	return axios
 		.get(`${GET_BY_ADDRESS}?${query}`)
+		.then((d: AxiosResponse<UsersQueryResponse>) => d.data);
+};
+const getVetNotificationTokens = (
+	query: string
+): Promise<UsersQueryResponse> => {
+	return axios
+		.get(`${GET_BY_ADDRESS_VET}?${query}`)
 		.then((d: AxiosResponse<UsersQueryResponse>) => d.data);
 };
 const getEventById = (id: ID): Promise<Event | undefined> => {
@@ -329,6 +337,7 @@ export {
 	deleteUser,
 	deleteSelectedUsers,
 	getNotificationTokens,
+	getVetNotificationTokens,
 	getEventById,
 	createEvent,
 	updateEvent,
