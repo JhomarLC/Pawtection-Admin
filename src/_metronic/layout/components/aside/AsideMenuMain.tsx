@@ -23,7 +23,7 @@ export function AsideMenuMain() {
 			/>
 			<AsideMenuItem
 				to="/medications-type"
-				icon="abstract-28"
+				icon="syringe"
 				title="Medications Type"
 			/>
 

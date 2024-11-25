@@ -1,9 +1,9 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { PetPhotos } from "../core/_models";
 import { useListView } from "../core/ListViewProvider";
 import { PetListLoading } from "../components/loading/PetListLoading";
 import { useQueryResponse } from "../core/QueryResponseProvider";
-// import { QRCodeSVG } from "qrcode.react";
+import styles from "../core/PetEditModalForm.module.css";
 
 type Props = {
 	isUserLoading: boolean;
@@ -13,6 +13,7 @@ type Props = {
 const PetEditModalForm: FC<Props> = ({ petphotos, isUserLoading }) => {
 	const { setItemIdForUpdate } = useListView();
 	const { refetch } = useQueryResponse();
+	const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null); // For viewing the photo in a modal
 
 	const cancel = (withRefresh?: boolean) => {
 		if (withRefresh) {
@@ -26,59 +27,31 @@ const PetEditModalForm: FC<Props> = ({ petphotos, isUserLoading }) => {
 	return (
 		<>
 			<form id="kt_modal_add_user_form" className="form" noValidate>
-				{/* begin::Scroll */}
-				<div
-					className="d-flex flex-column scroll-y me-n7 pe-7"
-					id="kt_modal_add_user_scroll"
-					data-kt-scroll="true"
-					data-kt-scroll-activate="{default: false, lg: true}"
-					data-kt-scroll-max-height="auto"
-					data-kt-scroll-dependencies="#kt_modal_add_user_header"
-					data-kt-scroll-wrappers="#kt_modal_add_user_scroll"
-					data-kt-scroll-offset="300px"
-				>
+				{/* begin::Photo Grid */}
+				<div className={styles.photoGrid}>
 					{petphotos.length > 0 ? (
 						petphotos.map((photo, index) => (
 							<div
-								className="fv-row mb-7"
+								className={styles.photoGridItem}
 								key={photo.id || index}
+								onClick={() =>
+									setSelectedPhoto(
+										`${PET_PROFILE_PATH}/${photo.image}`
+									)
+								}
 							>
-								{/* begin::Image input */}
 								<img
-									className="image-input-wrapper image-input image-input-outline bg-white p-2 h-125px"
-									data-kt-image-input="true"
+									className={styles.photoGridImage}
 									src={`${PET_PROFILE_PATH}/${photo.image}`}
-								>
-									{/* <QRCodeSVG
-										className="image-input-wrapper w-125px h-125px"
-										value={photo.image}
-									/> */}
-								</img>
+									alt={`Pet ${index + 1}`}
+								/>
 							</div>
 						))
 					) : (
-						<p>No photos available for this pet.</p>
+						<p className="text-center">No Pet Photos to show.</p>
 					)}
-
-					{/* <div className="fv-row mb-7">
-						<label className="d-block fw-bold fs-6 mb-5">
-							QR Code
-						</label>
-
-						<div
-							className="image-input image-input-outline bg-white p-2"
-							data-kt-image-input="true"
-							style={{ backgroundImage: `url('${blankImg}')` }}
-						>
-							<QRCodeSVG
-								className="image-input-wrapper w-125px h-125px"
-								value={petphotos?.id}
-							/>
-						</div>
-					</div> */}
 				</div>
-				{/* end::Scroll */}
-
+				;{/* end::Photo Grid */}
 				{/* begin::Actions */}
 				<div className="text-center pt-15">
 					<button
@@ -89,30 +62,60 @@ const PetEditModalForm: FC<Props> = ({ petphotos, isUserLoading }) => {
 					>
 						Close
 					</button>
-
-					{/* <button
-						type="submit"
-						className="btn btn-primary"
-						data-kt-users-modal-action="submit"
-						disabled={
-							isUserLoading ||
-							formik.isSubmitting ||
-							!formik.isValid ||
-							!formik.touched
-						}
-					>
-						<span className="indicator-label">Submit</span>
-						{(formik.isSubmitting || isUserLoading) && (
-							<span className="indicator-progress">
-								Please wait...{" "}
-								<span className="spinner-border spinner-border-sm align-middle ms-2"></span>
-							</span>
-						)}
-					</button> */}
 				</div>
 				{/* end::Actions */}
 			</form>
+
 			{isUserLoading && <PetListLoading />}
+
+			{/* Photo Modal */}
+			{selectedPhoto && (
+				<div
+					className="modal fade show d-block"
+					tabIndex={-1}
+					role="dialog"
+					style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+					onClick={() => setSelectedPhoto(null)}
+				>
+					<div
+						className="modal-dialog modal-dialog-centered"
+						role="document"
+						onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+					>
+						<div className="modal-content">
+							<div className="modal-header">
+								<h5 className="modal-title">Pet Photo</h5>
+								<button
+									type="button"
+									className="btn-close"
+									aria-label="Close"
+									onClick={() => setSelectedPhoto(null)}
+								></button>
+							</div>
+							<div className="modal-body text-center">
+								<img
+									src={selectedPhoto}
+									alt="Pet"
+									className="img-fluid"
+									style={{
+										maxHeight: "400px",
+										width: "auto",
+									}}
+								/>
+							</div>
+							<div className="modal-footer">
+								<button
+									type="button"
+									className="btn btn-secondary"
+									onClick={() => setSelectedPhoto(null)}
+								>
+									Close
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
 		</>
 	);
 };

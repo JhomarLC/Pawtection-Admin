@@ -53,7 +53,7 @@ const PetActionsCell: FC<Props> = ({ id }) => {
 				onClick={() => viewMedications(id)}
 			>
 				<KTIcon iconName="document" className="fs-5 m-0" />
-				Medications
+				Health Record
 			</button>
 		</>
 	);

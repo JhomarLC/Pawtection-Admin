@@ -1,0 +1,43 @@
+.photoGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 16px;
+	padding: 16px;
+}
+
+.photoGridItem {
+	width: 100%;
+	padding-top: 100%; /* Makes it a square */
+	position: relative;
+	cursor: pointer;
+	border-radius: 8px;
+	overflow: hidden;
+	background-color: #f3f3f3;
+}
+
+.photoGridImage {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform 0.3s ease;
+}
+
+.photoGridItem:hover .photoGridImage {
+	transform: scale(1.05); /* Zoom effect on hover */
+}
+
+.modal-body {
+	max-height: calc(
+		100vh - 200px
+	); /* Prevent modal from exceeding screen height */
+	overflow-y: auto; /* Enable scrolling when content overflows */
+	padding: 16px; /* Add some padding for better layout */
+}
+
+.modal-dialog {
+	max-width: 90%; /* Optional: Ensures the modal fits smaller screens */
+	margin: auto;
+}

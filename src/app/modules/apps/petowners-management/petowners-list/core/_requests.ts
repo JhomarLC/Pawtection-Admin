@@ -269,7 +269,7 @@ const exportToExcel = (data: PetOwner[]): void => {
 
 	// Append sheets to workbook
 	XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "Pet Owners");
-	XLSX.utils.book_append_sheet(workbook, petsSheet, "Pets");	
+	XLSX.utils.book_append_sheet(workbook, petsSheet, "Pets");
 	XLSX.utils.book_append_sheet(workbook, medicationsSheet, "All Medications");
 
 	// List of barangays
@@ -393,6 +393,105 @@ const exportToExcel = (data: PetOwner[]): void => {
 	// Export to Excel
 	XLSX.writeFile(workbook, fileName);
 };
+const exportToExcelPetOwners = (data: PetOwner[]): void => {
+	const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+	const randomNum = Math.floor(Math.random() * 1000);
+	const fileName = `PetOwners_${currentDate}_${randomNum}.xlsx`;
+
+	// Prepare data for Pet Owners sheet
+	const petOwnersData = data.map((owner) => ({
+		"Owner ID": owner.id, // Unique identifier for the owner
+		Name: owner.name,
+		Email: owner.email,
+		"Phone Number": owner.phone_number,
+		Address: `Zone ${owner.addr_zone}, Brgy.${owner.addr_brgy}, San Jose City, NE`,
+	}));
+
+	// List of barangays
+	const barangays: string[] = [
+		"A. Pascual",
+		"Abar Ist",
+		"Abar 2nd",
+		"Bagong Sikat",
+		"Caanawan",
+		"Calaocan",
+		"Camanacsacan",
+		"Culaylay",
+		"Dizol",
+		"Kaliwanagan",
+		"Kita-Kita",
+		"Malasin",
+		"Manicla",
+		"Palestina",
+		"Parang Mangga",
+		"Villa Joson",
+		"Pinili",
+		"Rafael Rueda, Sr. Pob.",
+		"Ferdinand E. Marcos Pob.",
+		"Canuto Ramos Pob.",
+		"Raymundo Eugenio Pob.",
+		"Crisanto Sanchez Pob.",
+		"Porais",
+		"San Agustin",
+		"San Juan",
+		"San Mauricio",
+		"Santo Niño 1st",
+		"Santo Niño 2nd",
+		"Santo Tomas",
+		"Sibut",
+		"Sinipit Bubon",
+		"Santo Niño 3rd",
+		"Tabulac",
+		"Tayabo",
+		"Tondod",
+		"Tulat",
+		"Villa Floresca",
+		"Villa Marina",
+	];
+
+	// Create a workbook
+	const workbook = XLSX.utils.book_new();
+
+	// Add a sheet for all pet owners
+	const petOwnersSheet = XLSX.utils.json_to_sheet(petOwnersData);
+	petOwnersSheet["!cols"] = [
+		{ wpx: 100 }, // Owner ID
+		{ wpx: 150 }, // Name
+		{ wpx: 200 }, // Email
+		{ wpx: 150 }, // Phone Number
+		{ wpx: 250 }, // Address
+	];
+	XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "Pet Owners");
+
+	// Add sheets for each barangay
+	barangays.forEach((barangay) => {
+		const barangayData = data
+			.filter((owner) => owner.addr_brgy === barangay)
+			.map((owner) => ({
+				"Owner ID": owner.id, // Unique identifier for the owner
+				Name: owner.name,
+				Email: owner.email,
+				"Phone Number": owner.phone_number,
+				Address: `Zone ${owner.addr_zone}, Brgy.${owner.addr_brgy}, San Jose City, NE`,
+			}));
+
+		if (barangayData.length > 0) {
+			const barangaySheet = XLSX.utils.json_to_sheet(barangayData);
+			barangaySheet["!cols"] = [
+				{ wpx: 100 }, // Owner ID
+				{ wpx: 150 }, // Name
+				{ wpx: 200 }, // Email
+				{ wpx: 150 }, // Phone Number
+				{ wpx: 250 }, // Address
+			];
+			XLSX.utils.book_append_sheet(workbook, barangaySheet, barangay);
+		}
+	});
+
+	// Export to Excel
+	XLSX.writeFile(workbook, fileName);
+};
+
 const exportToPDF = (data: User[]) => {
 	// Generate file name with current date and random number
 	const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -440,6 +539,7 @@ const exportToPDF = (data: User[]) => {
 };
 
 export {
+	exportToExcelPetOwners,
 	exportToExcel,
 	exportToPDF,
 	getUsers,

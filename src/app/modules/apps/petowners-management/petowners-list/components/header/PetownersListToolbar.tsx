@@ -1,6 +1,6 @@
 import { PetownersListFilter } from "./PetownersListFilter";
 // import { exportToExcel, exportToPDF } from "../../core/_requests";
-import { exportToExcel } from "../../core/_requests";
+import { exportToExcel, exportToExcelPetOwners } from "../../core/_requests";
 import { KTIcon } from "../../../../../../../_metronic/helpers";
 // import { useQueryResponseData } from "../../core/QueryResponseProvider";
 // import { useEffect, useMemo } from "react";
@@ -142,6 +142,22 @@ const PetownersListToolbar = () => {
 			<PetownersListFilter />
 			<button
 				type="button"
+				className="btn btn-light-success rimary me-3"
+				onClick={() => {
+					if (
+						window.confirm(
+							"Are you sure you want to export the data to Excel?"
+						)
+					) {
+						exportToExcelPetOwners(data);
+					}
+				}}
+			>
+				<KTIcon iconName="notepad" className="fs-2" />
+				Export Pet Owners to Excel
+			</button>
+			<button
+				type="button"
 				className="btn btn-light-success me-3"
 				onClick={() => {
 					if (
@@ -154,7 +170,7 @@ const PetownersListToolbar = () => {
 				}}
 			>
 				<KTIcon iconName="notepad" className="fs-2" />
-				Export to Excel
+				Export Pet Health Records to Excel
 			</button>
 			{/* <button
 				type="button"
