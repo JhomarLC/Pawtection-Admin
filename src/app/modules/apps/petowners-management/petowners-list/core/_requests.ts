@@ -268,8 +268,8 @@ const exportToExcel = (data: PetOwner[]): void => {
 	];
 
 	// Append sheets to workbook
-	// XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "Pet Owners");
-	// XLSX.utils.book_append_sheet(workbook, petsSheet, "Pets");
+	XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "Pet Owners");
+	XLSX.utils.book_append_sheet(workbook, petsSheet, "Pets");	
 	XLSX.utils.book_append_sheet(workbook, medicationsSheet, "All Medications");
 
 	// List of barangays
