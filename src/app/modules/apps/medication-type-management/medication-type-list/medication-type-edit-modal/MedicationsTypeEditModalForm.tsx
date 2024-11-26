@@ -83,13 +83,13 @@ const MedicationsTypeEditModalForm: FC<Props> = ({ mtype, isUserLoading }) => {
 						<div className="fv-row mb-7">
 							{/* begin::Label */}
 							<label className="required fw-bold fs-6 mb-2">
-								Medications Name
+								Medications Type
 							</label>
 							{/* end::Label */}
 
 							{/* begin::Input */}
 							<input
-								placeholder="Medications Name"
+								placeholder="Medications Type"
 								{...formik.getFieldProps("name")}
 								type="text"
 								name="name"

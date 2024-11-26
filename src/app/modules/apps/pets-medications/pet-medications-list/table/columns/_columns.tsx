@@ -31,8 +31,7 @@ const petMedicationsColumns: ReadonlyArray<Column<PetMed>> = [
 		Cell: ({ ...props }) => (
 			<PetMedType
 				medtype={
-					props.data[props.row.index].medicationname
-						?.medication_type_id
+					props.data[props.row.index].medicationname?.medtype?.name
 				}
 			/>
 		),

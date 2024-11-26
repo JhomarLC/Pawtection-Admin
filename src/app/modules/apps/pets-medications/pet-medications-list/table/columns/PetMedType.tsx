@@ -1,7 +1,7 @@
 import { FC } from "react";
 
 type Props = {
-	medtype?: number;
+	medtype?: string;
 };
 
 const PetMedType: FC<Props> = ({ medtype }) => (

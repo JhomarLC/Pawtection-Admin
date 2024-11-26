@@ -19,6 +19,11 @@ export type Veterinarian = {
 export type MedicationName = {
 	name?: string;
 	medication_type_id?: number;
+	medtype?: MedicationType;
+};
+
+export type MedicationType = {
+	name?: string;
 };
 
 export type PetMed = {
