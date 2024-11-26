@@ -87,12 +87,7 @@ async function saveNotificationToHistory(
 
 // Function to send notifications
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sendNotifications = async (
-	users: any[],
-	title: string,
-	body: string,
-	action: string
-) => {
+const sendNotifications = async (users: any[], title: string, body: string) => {
 	if (!users || users.length === 0) {
 		console.log("No tokens found in response.");
 		return;

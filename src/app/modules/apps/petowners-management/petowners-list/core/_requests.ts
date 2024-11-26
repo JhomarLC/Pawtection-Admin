@@ -155,28 +155,6 @@ const exportToExcel = (data: PetOwner[]): void => {
 	const randomNum = Math.floor(Math.random() * 1000);
 	const fileName = `PetOwners_${currentDate}_${randomNum}.xlsx`;
 
-	// Prepare data for Pet Owners sheet
-	const petOwnersData = data.map((owner) => ({
-		"Owner ID": owner.id, // Unique identifier for the owner
-		Name: owner.name,
-		Email: owner.email,
-		"Phone Number": owner.phone_number,
-		Address: `Zone ${owner.addr_zone}, Brgy.${owner.addr_brgy}, San Jose City, NE`,
-	}));
-
-	// Prepare data for Pets sheet
-	const petsData = data.flatMap((owner) =>
-		owner.pets.map((pet) => ({
-			"Owner ID": owner.id, // Linking pet to owner
-			"Pet ID": pet.id, // Unique pet identifier
-			"Owner Name": owner.name,
-			"Pet Name": pet.name,
-			Breed: pet.breed,
-			"Date of Birth": pet.date_of_birth,
-			Status: pet.status,
-		}))
-	);
-
 	// Prepare data for Medications sheet
 	const medicationsData = data
 		.flatMap((owner) =>
@@ -215,9 +193,6 @@ const exportToExcel = (data: PetOwner[]): void => {
 	// Create a workbook
 	const workbook = XLSX.utils.book_new();
 
-	// Add sheets for pet owners, pets, and medications
-	const petOwnersSheet = XLSX.utils.json_to_sheet(petOwnersData);
-	const petsSheet = XLSX.utils.json_to_sheet(petsData);
 	// const medicationsSheet = XLSX.utils.json_to_sheet(medicationsData);
 	const medicationsSheet = XLSX.utils.json_to_sheet([]);
 	XLSX.utils.sheet_add_aoa(medicationsSheet, [["Medications Data"]], {
@@ -229,23 +204,6 @@ const exportToExcel = (data: PetOwner[]): void => {
 
 	medicationsSheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 14 } }]; // Merge title across 15 columns
 
-	// Adjust column widths
-	petOwnersSheet["!cols"] = [
-		{ wpx: 100 }, // Owner ID
-		{ wpx: 150 }, // Name
-		{ wpx: 200 }, // Email
-		{ wpx: 150 }, // Phone Number
-		{ wpx: 250 }, // Address
-	];
-	petsSheet["!cols"] = [
-		{ wpx: 100 }, // Owner ID
-		{ wpx: 100 }, // Pet ID
-		{ wpx: 150 }, // Owner Name
-		{ wpx: 150 }, // Pet Name
-		{ wpx: 150 }, // Breed
-		{ wpx: 150 }, // Date of Birth
-		{ wpx: 100 }, // Status
-	];
 	medicationsSheet["!cols"] = [
 		// { wpx: 100 }, // Owner ID
 		// { wpx: 100 }, // Pet ID
@@ -268,9 +226,13 @@ const exportToExcel = (data: PetOwner[]): void => {
 	];
 
 	// Append sheets to workbook
-	XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "Pet Owners");
-	XLSX.utils.book_append_sheet(workbook, petsSheet, "Pets");
-	XLSX.utils.book_append_sheet(workbook, medicationsSheet, "All Medications");
+	// XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "Pet Owners");
+	// XLSX.utils.book_append_sheet(workbook, petsSheet, "Pets");
+	XLSX.utils.book_append_sheet(
+		workbook,
+		medicationsSheet,
+		"All Health Record"
+	);
 
 	// List of barangays
 	const barangays = [
@@ -386,13 +348,14 @@ const exportToExcel = (data: PetOwner[]): void => {
 			XLSX.utils.book_append_sheet(
 				workbook,
 				barangaySheet,
-				barangay + " Medications"
+				barangay + " Health Record"
 			);
 		}
 	});
 	// Export to Excel
 	XLSX.writeFile(workbook, fileName);
 };
+
 const exportToExcelPetOwners = (data: PetOwner[]): void => {
 	const currentDate = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 	const randomNum = Math.floor(Math.random() * 1000);
@@ -400,7 +363,7 @@ const exportToExcelPetOwners = (data: PetOwner[]): void => {
 
 	// Prepare data for Pet Owners sheet
 	const petOwnersData = data.map((owner) => ({
-		"Owner ID": owner.id, // Unique identifier for the owner
+		// "Owner ID": owner.id, // Unique identifier for the owner
 		Name: owner.name,
 		Email: owner.email,
 		"Phone Number": owner.phone_number,
@@ -453,22 +416,33 @@ const exportToExcelPetOwners = (data: PetOwner[]): void => {
 	const workbook = XLSX.utils.book_new();
 
 	// Add a sheet for all pet owners
-	const petOwnersSheet = XLSX.utils.json_to_sheet(petOwnersData);
+	// const petOwnersSheet = XLSX.utils.json_to_sheet(petOwnersData);
+	const petOwnersSheet = XLSX.utils.json_to_sheet([]);
+	XLSX.utils.sheet_add_aoa(petOwnersSheet, [["All Pet Owners"]], {
+		origin: "A1",
+	});
+	XLSX.utils.sheet_add_json(petOwnersSheet, petOwnersData, {
+		origin: "A2",
+	});
+
+	petOwnersSheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }]; // Merge title across 15 columns
+
 	petOwnersSheet["!cols"] = [
-		{ wpx: 100 }, // Owner ID
+		// { wpx: 100 }, // Owner ID
 		{ wpx: 150 }, // Name
 		{ wpx: 200 }, // Email
 		{ wpx: 150 }, // Phone Number
 		{ wpx: 250 }, // Address
 	];
-	XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "Pet Owners");
+
+	XLSX.utils.book_append_sheet(workbook, petOwnersSheet, "All Pet Owners");
 
 	// Add sheets for each barangay
 	barangays.forEach((barangay) => {
 		const barangayData = data
 			.filter((owner) => owner.addr_brgy === barangay)
 			.map((owner) => ({
-				"Owner ID": owner.id, // Unique identifier for the owner
+				// "Owner ID": owner.id, // Unique identifier for the owner
 				Name: owner.name,
 				Email: owner.email,
 				"Phone Number": owner.phone_number,
@@ -476,9 +450,22 @@ const exportToExcelPetOwners = (data: PetOwner[]): void => {
 			}));
 
 		if (barangayData.length > 0) {
-			const barangaySheet = XLSX.utils.json_to_sheet(barangayData);
+			// const barangaySheet = XLSX.utils.json_to_sheet(barangayData);
+			const barangaySheet = XLSX.utils.json_to_sheet([]);
+			XLSX.utils.sheet_add_aoa(
+				barangaySheet,
+				[[`${barangay} - Pet Owners`]],
+				{ origin: "A1" }
+			);
+			XLSX.utils.sheet_add_json(barangaySheet, barangayData, {
+				origin: "A2",
+			});
+
+			barangaySheet["!merges"] = [
+				{ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+			];
 			barangaySheet["!cols"] = [
-				{ wpx: 100 }, // Owner ID
+				// { wpx: 100 }, // Owner ID
 				{ wpx: 150 }, // Name
 				{ wpx: 200 }, // Email
 				{ wpx: 150 }, // Phone Number

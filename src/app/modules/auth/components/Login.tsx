@@ -1,7 +1,7 @@
 import { useState } from "react";
 import * as Yup from "yup";
 import clsx from "clsx";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { useFormik } from "formik";
 import { getUserByToken, login } from "../core/_requests";
 import { useAuth } from "../core/Auth";
@@ -70,25 +70,15 @@ export function Login() {
 					San Jose City Pawtection
 				</div>
 			</div>
-			{/* begin::Heading */}
 
-			{/* {formik.status ? (
+			{formik.status && (
 				<div className="mb-lg-15 alert alert-danger">
 					<div className="alert-text font-weight-bold">
 						{formik.status}
 					</div>
 				</div>
-			) : (
-				<div className="mb-10 bg-light-info p-8 rounded">
-					<div className="text-info">
-						Use account{" "}
-						<strong>candelario.jhomar@clsu2.edu.ph</strong> and
-						password <strong>password</strong> to continue.
-					</div>
-				</div>
-			)} */}
+			)}
 
-			{/* begin::Form group */}
 			<div className="fv-row mb-8">
 				<label className="form-label fs-6 fw-bolder text-white">
 					Email

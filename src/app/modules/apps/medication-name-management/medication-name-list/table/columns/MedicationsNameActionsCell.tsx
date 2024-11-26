@@ -7,6 +7,7 @@ import { useListView } from "../../core/ListViewProvider";
 import { useQueryResponse } from "../../core/QueryResponseProvider";
 import { deleteMName } from "../../core/_requests";
 import { MNames } from "../../core/_models";
+import { AlertModal } from "../../../../../../../_metronic/partials/modals/AlertModal";
 
 type Props = {
 	id: string | undefined;
@@ -20,6 +21,34 @@ const MedicationsNameActionsCell: FC<Props> = ({ id, mnames }) => {
 
 	// State to track whether the delete option should be shown
 	const [showDelete, setShowDelete] = useState(false);
+
+	const [alertVisible, setAlertVisible] = useState(false);
+	const [alertAction, setAlertAction] = useState<(() => void) | null>(null);
+	const [message, setMessage] = useState("");
+	const [modalTitle, setModalTitle] = useState("");
+	const [alertType, setAlertType] = useState<
+		"danger" | "warning" | "primary" | "success"
+	>("danger");
+
+	const handleShowAlert = (
+		type: "danger" | "warning" | "primary" | "success",
+		title: string,
+		message: string,
+		action?: () => void // Op
+	) => {
+		setAlertType(type);
+		setModalTitle(title);
+		setMessage(message);
+		// Optionally set the action to a state variable
+		if (action) {
+			setAlertAction(() => action); // Store the action in a state variable
+		}
+		setAlertVisible(true);
+	};
+
+	const handleCloseAlert = () => {
+		setAlertVisible(false);
+	};
 
 	useEffect(() => {
 		const checkDeleteVisibility = () => {
@@ -60,6 +89,20 @@ const MedicationsNameActionsCell: FC<Props> = ({ id, mnames }) => {
 
 	return (
 		<>
+			<AlertModal
+				type={alertType} // Dynamically sets the alert type
+				title={modalTitle}
+				message={message}
+				show={alertVisible}
+				onClose={handleCloseAlert}
+				onCancel={() => {
+					handleCloseAlert();
+				}}
+				onConfirm={() => {
+					if (alertAction) alertAction(); // Execute the stored action
+					handleCloseAlert();
+				}}
+			/>
 			<button
 				className="btn btn-light btn-active-light-primary btn-sm"
 				data-kt-menu-trigger="click"
@@ -87,7 +130,16 @@ const MedicationsNameActionsCell: FC<Props> = ({ id, mnames }) => {
 						<a
 							className="menu-link px-3"
 							data-kt-users-table-filter="delete_row"
-							onClick={async () => await deleteItem.mutateAsync()}
+							onClick={() =>
+								handleShowAlert(
+									"danger",
+									"Warning",
+									"Are you sure you want to delete this Medication Name?",
+									async () => {
+										await deleteItem.mutateAsync();
+									}
+								)
+							}
 						>
 							Delete
 						</a>
