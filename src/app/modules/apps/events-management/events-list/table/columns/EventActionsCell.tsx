@@ -353,8 +353,8 @@ const EventActionsCell: FC<Props> = ({ id, event }) => {
 											"Warning",
 											"Are you sure you want to delete this Event?",
 											async () => {
-												await handleNotifyPetOwnersDelete();
 												await deleteItem.mutateAsync();
+												await handleNotifyPetOwnersDelete();
 											}
 										)
 									}
