@@ -6,7 +6,6 @@ import { VeterinariansCustomHeader } from "./VeterinariansCustomHeader";
 import { User } from "../../core/_models";
 import { VeterinariansLicenseNumber } from "./VeterinariansLicenseNumber";
 import { VeterinariansPosition } from "./VeterinariansPosition";
-import { VeterinariansES } from "./VeterinariansES";
 import { VeterinariansStatus } from "./VeterinariansStatus";
 import { VeterinariansActionsCell } from "./VeterinariansActionsCell";
 import { VeterinariansPhoneNumber } from "./VeterinariansPhoneNumber";
@@ -70,23 +69,7 @@ const veterinariansColumns: ReadonlyArray<Column<User>> = [
 			/>
 		),
 	},
-	{
-		Header: (props) => (
-			<VeterinariansCustomHeader
-				tableProps={props}
-				title="E-Signature"
-				className="min-w-125px"
-			/>
-		),
-		id: "electronic_signature",
-		Cell: ({ ...props }) => (
-			<VeterinariansES
-				electronic_signature={
-					props.data[props.row.index].electronic_signature
-				}
-			/>
-		),
-	},
+
 	{
 		Header: (props) => (
 			<VeterinariansCustomHeader
