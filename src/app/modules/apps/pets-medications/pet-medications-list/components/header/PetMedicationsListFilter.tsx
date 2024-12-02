@@ -6,14 +6,50 @@ import {
 } from "../../../../../../../_metronic/helpers";
 import { useQueryRequest } from "../../core/QueryRequestProvider";
 import { useQueryResponse } from "../../core/QueryResponseProvider";
+import axios, { AxiosResponse } from "axios";
+
+// Define the type for each veterinarian
+interface Veterinarian {
+	id: string;
+	name: string;
+	email: string;
+	image: string;
+	email_verified_at: string | null;
+	position: string;
+	license_number: string;
+	phone_number: string;
+	status: string;
+	created_at: string;
+	updated_at: string;
+}
+
+// Define the response type
+interface VeterinariansResponse {
+	data: Veterinarian[];
+	filtered_count: number;
+}
 
 const PetMedicationsListFilter = () => {
 	const { updateState } = useQueryRequest();
 	const { isLoading } = useQueryResponse();
 	const [remarks, setRemarks] = useState<string | undefined>();
+	const [vet, setVet] = useState<string | undefined>();
+	const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([]);
 
 	useEffect(() => {
+		const fetchVets = async () => {
+			const response: AxiosResponse<VeterinariansResponse> =
+				await axios.get(
+					`${import.meta.env.VITE_APP_API_URL}/veterinarians`
+				);
+
+			console.log(response.data.data);
+
+			setVeterinarians(response.data.data);
+		};
+
 		MenuComponent.reinitialization();
+		fetchVets();
 	}, []);
 
 	const resetData = () => {
@@ -22,7 +58,7 @@ const PetMedicationsListFilter = () => {
 
 	const filterData = () => {
 		updateState({
-			search: remarks,
+			search: remarks || vet,
 			...initialQueryState,
 		});
 	};
@@ -60,6 +96,30 @@ const PetMedicationsListFilter = () => {
 
 				{/* begin::Content */}
 				<div className="px-7 py-5" data-kt-user-table-filter="form">
+					{/* begin::Input group */}
+					<div className="mb-10">
+						<label className="form-label fs-6 fw-bold">
+							Veterinarians:
+						</label>
+						<select
+							className="form-select form-select-solid fw-bolder"
+							data-kt-select2="true"
+							data-placeholder="Select option"
+							data-allow-clear="true"
+							data-kt-user-table-filter="brgy"
+							data-hide-search="true"
+							onChange={(e) => setVet(e.target.value)}
+							value={vet}
+						>
+							<option value="">All Veterinarians</option>
+							{veterinarians.map((vet) => (
+								<option key={vet.id} value={vet.name}>
+									{vet.name}
+								</option>
+							))}
+						</select>
+					</div>
+					{/* end::Input group */}
 					{/* begin::Input group */}
 					<div className="mb-10">
 						<label className="form-label fs-6 fw-bold">

@@ -6,7 +6,7 @@ import { useThemeMode } from "../../layout/theme-mode/ThemeModeProvider";
 import Select, { SingleValue } from "react-select";
 
 type Option = {
-	value: string;
+	value: string | number;
 	label: string;
 };
 
@@ -22,6 +22,8 @@ const MixedWidget16: FC<Props> = ({ className, chartColor, chartHeight }) => {
 	const [categories, setCategories] = useState<string[]>([]);
 	const [seriesData, setSeriesData] = useState<number[]>([]);
 	const [totalCount, setTotalCount] = useState<number>(0);
+	const [petTotalCount, setPetTotalCount] = useState<number>(0);
+	const [percentage, setPercentage] = useState<number>(0);
 	const [type, setType] = useState<"monthly" | "yearly">("monthly");
 	const [selectedPetType, setSelectedPetType] = useState<Option>({
 		value: "All",
@@ -83,6 +85,88 @@ const MixedWidget16: FC<Props> = ({ className, chartColor, chartHeight }) => {
 		{ value: "Villa Floresca", label: "Villa Floresca" },
 		{ value: "Villa Marina", label: "Villa Marina" },
 	];
+	const [medicationTypeOptions, setMedicationTypeOptions] = useState<
+		Option[]
+	>([]);
+	const [selectedMedicationType, setSelectedMedicationType] =
+		useState<Option | null>({
+			value: 1,
+			label: "Vaccine",
+		});
+	const [medicationOptions, setMedicationOptions] = useState<Option[]>([]);
+	const [selectedMedication, setSelectedMedication] = useState<Option | null>(
+		{
+			value: 1,
+			label: "Anti-Rabies",
+		}
+	);
+	// Fetch Medication Types on Mount
+	useEffect(() => {
+		const fetchMedicationTypes = async () => {
+			try {
+				const response = await axios.get(
+					`${import.meta.env.VITE_APP_API_URL}/medtype`
+				);
+				const medicationTypes = response.data.data.map(
+					(med: { id: string; name: string }) => ({
+						value: med.id,
+						label: med.name,
+					})
+				);
+				setMedicationTypeOptions(medicationTypes);
+
+				if (medicationTypes.length > 0) {
+					setSelectedMedicationType(medicationTypes[0]);
+				}
+			} catch (error) {
+				console.error("Error fetching medication types:", error);
+			}
+		};
+
+		fetchMedicationTypes();
+	}, []);
+
+	// Fetch Medications When Medication Type Changes
+	useEffect(() => {
+		const fetchMedications = async () => {
+			try {
+				if (!selectedMedicationType) {
+					setMedicationOptions([]);
+					setSelectedMedication(null);
+					return;
+				}
+
+				const medtypeId = selectedMedicationType.value;
+
+				const response = await axios.get(
+					`${
+						import.meta.env.VITE_APP_API_URL
+					}/medtype/${medtypeId}/medname`
+				);
+				const medications = response.data.data.map(
+					(med: { id: string; name: string }) => ({
+						value: med.id,
+						label: med.name,
+					})
+				);
+
+				setMedicationOptions(medications);
+
+				if (medications.length > 0) {
+					setSelectedMedication(medications[0]);
+				} else {
+					setSelectedMedication(null);
+				}
+				console.log("====================================");
+				console.log(seriesData);
+				console.log("====================================");
+			} catch (error) {
+				console.error("Error fetching medications:", error);
+			}
+		};
+
+		fetchMedications();
+	}, [selectedMedicationType]);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -92,21 +176,24 @@ const MixedWidget16: FC<Props> = ({ className, chartColor, chartHeight }) => {
 						import.meta.env.VITE_APP_API_URL
 					}/getchart?type=${type}&count=${
 						selectedBarangay.value
-					}&pettype=${selectedPetType.value}`
+					}&pettype=${selectedPetType.value}&medication=${
+						selectedMedication?.value
+					}`
 				); // Replace with your endpoint
 				const data = response.data;
-
 				// Assuming the response has "categories" and "data" keys
 				setCategories(data.categories || []);
 				setSeriesData(data.data || []);
 				setTotalCount(data.total_count || 0);
+				setPetTotalCount(data.total_pet_count || 0);
+				setPercentage(data.percentage || 0);
 			} catch (error) {
 				console.error("Error fetching chart data:", error);
 			}
 		};
 
 		fetchData();
-	}, [type, selectedBarangay.value, selectedPetType]);
+	}, [type, selectedBarangay.value, selectedPetType, selectedMedication]);
 
 	const refreshChart = () => {
 		if (!chartRef.current) {
@@ -167,6 +254,40 @@ const MixedWidget16: FC<Props> = ({ className, chartColor, chartHeight }) => {
 								className="react-select-styled react-select-solid react-select-sm"
 								classNamePrefix="react-select"
 								onChange={(newValue: SingleValue<Option>) => {
+									setSelectedMedicationType(newValue);
+								}}
+								value={selectedMedicationType}
+								options={medicationTypeOptions}
+								styles={{
+									control: (provided) => ({
+										...provided,
+										minWidth: 200,
+										marginTop: 8,
+									}),
+								}}
+								placeholder="Select Medication Type"
+							/>
+							<Select
+								className="react-select-styled react-select-solid react-select-sm"
+								classNamePrefix="react-select"
+								onChange={(newValue: SingleValue<Option>) => {
+									setSelectedMedication(newValue);
+								}}
+								value={selectedMedication}
+								options={medicationOptions}
+								styles={{
+									control: (provided) => ({
+										...provided,
+										minWidth: 200,
+										marginTop: 8,
+									}),
+								}}
+								placeholder="Select Medication"
+							/>
+							<Select
+								className="react-select-styled react-select-solid react-select-sm"
+								classNamePrefix="react-select"
+								onChange={(newValue: SingleValue<Option>) => {
 									if (newValue) setSelectedPetType(newValue);
 								}}
 								value={selectedPetType}
@@ -209,7 +330,7 @@ const MixedWidget16: FC<Props> = ({ className, chartColor, chartHeight }) => {
 								href="#"
 								className="text-gray-900 text-hover-success fw-bold fs-3"
 							>
-								Vaccinated (Anti-Rabies)
+								Vaccinated ({selectedMedication?.label})
 							</a>
 
 							<div className="text-muted fs-7 fw-semibold">
@@ -220,7 +341,10 @@ const MixedWidget16: FC<Props> = ({ className, chartColor, chartHeight }) => {
 						</div>
 
 						<div className={`fw-bold fs-1 text-${chartColor}`}>
-							{totalCount}
+							{totalCount} / {petTotalCount}
+							<div className={`fw-bold fs-7 text-${chartColor}`}>
+								({percentage}%)
+							</div>
 						</div>
 					</div>
 				</div>

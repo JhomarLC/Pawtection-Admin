@@ -6,6 +6,7 @@ import { MixedWidget10 } from "../../../_metronic/partials/widgets/mixed/MixedWi
 import { MixedWidget16 } from "../../../_metronic/partials/widgets/mixed/MixedWidget16";
 import { MixedWidget17 } from "../../../_metronic/partials/widgets/mixed/MixedWidget17";
 import axios, { AxiosResponse } from "axios";
+import { MixedWidget18 } from "../../../_metronic/partials/widgets/mixed/MixedWidget18";
 
 // Define API response interfaces
 interface VeterinariansResponse {
@@ -22,6 +23,7 @@ const DashboardWrapper = () => {
 	const intl = useIntl();
 	const [actiVets, setActivets] = useState<number>(0);
 	const [eventCount, setEventCount] = useState<number>(0);
+	const [feeToday, setFeeToday] = useState<number>();
 	const [loading, setLoading] = useState<boolean>(true); // Loading state
 
 	const getDashboardData = async () => {
@@ -34,6 +36,17 @@ const DashboardWrapper = () => {
 					}/veterinarians?status=approved`
 				);
 			setActivets(response.data.filtered_count || 0);
+
+			const responseFee: AxiosResponse<{
+				date: string;
+				total_fees: number;
+			}> = await axios.get(
+				`${import.meta.env.VITE_APP_API_URL}/pets/medications/fee`
+			);
+			console.log("====================================");
+			console.log(responseFee);
+			console.log("====================================");
+			setFeeToday(responseFee.data.total_fees || 0); // Set only total_fees
 
 			const eventResponse: AxiosResponse<{ data: Event[] }> =
 				await axios.get(`${import.meta.env.VITE_APP_API_URL}/events`);
@@ -73,7 +86,6 @@ const DashboardWrapper = () => {
 						count={actiVets || 0}
 					/>
 				</div>
-
 				<div className="col-xl-4">
 					<StatisticsWidget5
 						className="card-xl-stretch mb-xl-8"
@@ -85,6 +97,19 @@ const DashboardWrapper = () => {
 						titleColor="white"
 						descriptionColor="white"
 						count={eventCount || 0}
+					/>
+				</div>
+				<div className="col-xl-4">
+					<StatisticsWidget5
+						className="card-xl-stretch mb-xl-8"
+						svgIcon="sort"
+						color="warning"
+						iconColor="white"
+						title="Medication Fee"
+						description="Medication Fee Received Today"
+						titleColor="white"
+						descriptionColor="white"
+						count={"PHP " + (feeToday ? feeToday : 0)}
 					/>
 				</div>
 			</div>
@@ -111,29 +136,40 @@ const MixedWidgets = React.memo(({ loading }: { loading: boolean }) => {
 	}
 
 	return (
-		<div className="row g-5 g-xl-8">
-			<div className="col-xl-4">
-				<MixedWidget10
-					className="card-xl-stretch-100 mb-xl-8"
-					chartColor="primary"
-					chartHeight="100px"
-				/>
+		<>
+			<div className="row g-5 g-xl-8">
+				<div className="col-xl-4">
+					<MixedWidget10
+						className="card-xl-stretch-100 mb-xl-8"
+						chartColor="primary"
+						chartHeight="100px"
+					/>
+				</div>
+				<div className="col-xl-4">
+					<MixedWidget17
+						className="card-xl-stretch-100 mb-xl-8"
+						chartColor="primary"
+						chartHeight="100px"
+					/>
+				</div>
+				<div className="col-xl-4">
+					<MixedWidget18
+						className="card-xl-stretch-100 mb-xl-8"
+						chartColor="warning"
+						chartHeight="150px"
+					/>
+				</div>
 			</div>
-			<div className="col-xl-4">
-				<MixedWidget16
-					className="card-xl-stretch-100 mb-xl-8"
-					chartColor="success"
-					chartHeight="100px"
-				/>
+			<div className="row g-5 g-xl-8">
+				<div className="col-xl-8">
+					<MixedWidget16
+						className="card-xl-stretch-100 mb-xl-8"
+						chartColor="success"
+						chartHeight="100px"
+					/>
+				</div>
 			</div>
-			<div className="col-xl-4">
-				<MixedWidget17
-					className="card-xl-stretch-100 mb-xl-8"
-					chartColor="warning"
-					chartHeight="100px"
-				/>
-			</div>
-		</div>
+		</>
 	);
 });
 

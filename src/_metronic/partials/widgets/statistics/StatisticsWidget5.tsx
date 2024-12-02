@@ -10,7 +10,7 @@ type Props = {
 	titleColor?: string;
 	description: string;
 	descriptionColor?: string;
-	count?: number;
+	count?: number | string;
 };
 
 const StatisticsWidget5: React.FC<Props> = ({
