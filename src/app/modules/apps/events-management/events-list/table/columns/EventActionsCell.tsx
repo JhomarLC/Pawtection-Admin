@@ -44,6 +44,22 @@ const EventActionsCell: FC<Props> = ({ id, event }) => {
 		"danger" | "warning" | "primary" | "success"
 	>("danger");
 
+	// New state for notification button cooldown
+	const [isNotifyDisabled, setIsNotifyDisabled] = useState(false);
+	const [countdown, setCountdown] = useState(0);
+
+	useEffect(() => {
+		let timer: NodeJS.Timeout;
+		if (countdown > 0) {
+			timer = setTimeout(() => {
+				setCountdown((prev) => prev - 1);
+			}, 1000);
+		} else if (isNotifyDisabled) {
+			setIsNotifyDisabled(false);
+		}
+		return () => clearTimeout(timer);
+	}, [countdown, isNotifyDisabled]);
+
 	const handleShowAlert = (
 		type: "danger" | "warning" | "primary" | "success",
 		title: string,
@@ -230,6 +246,9 @@ const EventActionsCell: FC<Props> = ({ id, event }) => {
 	});
 	const handleNotifyPetOwners = async () => {
 		try {
+			setIsNotifyDisabled(true); // Disable the button
+			setCountdown(60); // Start a 1-minute countdown
+
 			const res = await getNotificationTokens("");
 			const res_vet = await getVetNotificationTokens("approved");
 			const notificationHistory: Notif = {
@@ -378,9 +397,12 @@ const EventActionsCell: FC<Props> = ({ id, event }) => {
 								}
 							)
 						}
+						disabled={isNotifyDisabled} // Disable the button during cooldown
 					>
 						<KTIcon iconName="notification" className="fs-5 m-0" />
-						Notify Users
+						{isNotifyDisabled
+							? `Wait ${countdown}s`
+							: "Notify Users"}
 					</button>
 				</>
 			)}

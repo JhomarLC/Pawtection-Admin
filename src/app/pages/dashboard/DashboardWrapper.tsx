@@ -43,9 +43,7 @@ const DashboardWrapper = () => {
 			}> = await axios.get(
 				`${import.meta.env.VITE_APP_API_URL}/pets/medications/fee`
 			);
-			console.log("====================================");
-			console.log(responseFee);
-			console.log("====================================");
+
 			setFeeToday(responseFee.data.total_fees || 0); // Set only total_fees
 
 			const eventResponse: AxiosResponse<{ data: Event[] }> =

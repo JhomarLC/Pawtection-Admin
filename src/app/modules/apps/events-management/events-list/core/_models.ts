@@ -7,6 +7,7 @@ export type Event = {
 	description?: string;
 	token?: string;
 	created_at?: string | number | Date;
+	updated_at?: string | number | Date;
 };
 
 export type UsersQueryResponse = Response<Array<Event>>;
