@@ -9,6 +9,7 @@ import { VeterinariansPosition } from "./VeterinariansPosition";
 import { VeterinariansStatus } from "./VeterinariansStatus";
 import { VeterinariansActionsCell } from "./VeterinariansActionsCell";
 import { VeterinariansPhoneNumber } from "./VeterinariansPhoneNumber";
+import { VeterinariansAddress } from "./VeterinariansAddress";
 
 const veterinariansColumns: ReadonlyArray<Column<User>> = [
 	{
@@ -69,7 +70,19 @@ const veterinariansColumns: ReadonlyArray<Column<User>> = [
 			/>
 		),
 	},
-
+	{
+		Header: (props) => (
+			<VeterinariansCustomHeader
+				tableProps={props}
+				title="Status"
+				className="min-w-125px"
+			/>
+		),
+		id: "address",
+		Cell: ({ ...props }) => (
+			<VeterinariansAddress user={props.data[props.row.index]} />
+		),
+	},
 	{
 		Header: (props) => (
 			<VeterinariansCustomHeader
@@ -83,6 +96,7 @@ const veterinariansColumns: ReadonlyArray<Column<User>> = [
 			<VeterinariansStatus status={props.data[props.row.index].status} />
 		),
 	},
+
 	{
 		Header: (props) => (
 			<VeterinariansCustomHeader

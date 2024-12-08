@@ -153,7 +153,7 @@ const chartOptions = (
 	return {
 		series: [
 			{
-				name: "Approved",
+				name: "Fee Received",
 				data: seriesData,
 			},
 		],
@@ -254,7 +254,7 @@ const chartOptions = (
 			},
 			y: {
 				formatter: function (val) {
-					return val + " Pets";
+					return "PHP " + val;
 				},
 			},
 		},

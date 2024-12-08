@@ -4,6 +4,8 @@ export type User = {
 	name?: string;
 	image?: string;
 	email?: string;
+	addr_zone?: string;
+	addr_brgy?: string;
 	position?: string;
 	license_number?: string;
 	status?: string;
