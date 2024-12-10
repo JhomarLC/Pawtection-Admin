@@ -74,7 +74,7 @@ const veterinariansColumns: ReadonlyArray<Column<User>> = [
 		Header: (props) => (
 			<VeterinariansCustomHeader
 				tableProps={props}
-				title="Status"
+				title="Address"
 				className="min-w-125px"
 			/>
 		),

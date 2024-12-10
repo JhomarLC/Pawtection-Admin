@@ -6,7 +6,7 @@ type Props = {
 };
 
 const VeterinariansAddress: FC<Props> = ({ user }) => (
-	<div className="text-center mb-1">
+	<div className="mb-1">
 		Zone {user?.addr_zone}, Brgy.{user?.addr_brgy}
 		<br />
 		San Jose City, NE
