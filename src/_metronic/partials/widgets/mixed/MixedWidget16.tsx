@@ -343,7 +343,7 @@ const MixedWidget16: FC<Props> = ({ className, chartColor, chartHeight }) => {
 						<div className={`fw-bold fs-1 text-${chartColor}`}>
 							{totalCount} / {petTotalCount}
 							<div className={`fw-bold fs-7 text-${chartColor}`}>
-								({percentage}%)
+								({Math.round(percentage * 100) / 100}%)
 							</div>
 						</div>
 					</div>
