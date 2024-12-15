@@ -3,10 +3,13 @@ import { KTIcon } from "../../../../../../../_metronic/helpers";
 import { useQueryResponseData } from "../../core/QueryResponseProvider";
 import { exportToExcel, exportToPDF } from "../../core/_requests";
 import { VeterinariansListFilter } from "./VeterinariansListFilter";
+import { useAuth } from "../../../../../auth";
 
 const VeterinariansListToolbar = () => {
 	const users = useQueryResponseData();
 	const data = useMemo(() => users, [users]);
+
+	const { currentUser } = useAuth();
 
 	return (
 		<div
@@ -41,7 +44,7 @@ const VeterinariansListToolbar = () => {
 							"Are you sure you want to export the data to PDF?"
 						)
 					) {
-						exportToPDF(data);
+						exportToPDF(data, currentUser?.user.name);
 					}
 				}}
 			>

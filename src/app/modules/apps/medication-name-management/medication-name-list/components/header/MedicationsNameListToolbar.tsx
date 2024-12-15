@@ -4,6 +4,7 @@ import { useListView } from "../../core/ListViewProvider";
 import { useQueryResponseData } from "../../core/QueryResponseProvider";
 import { MedicationsNameListFilter } from "./MedicationsNameListFilter";
 import { exportToExcel, exportToPDF } from "../../core/_requests";
+import { useAuth } from "../../../../../auth";
 
 const MedicationsNameListToolbar = () => {
 	const { setItemIdForUpdate } = useListView();
@@ -14,6 +15,9 @@ const MedicationsNameListToolbar = () => {
 	const data = useMemo(() => users, [users]);
 
 	console.log(users, data);
+
+	const { currentUser } = useAuth();
+
 	return (
 		<div
 			className="d-flex justify-content-end"
@@ -45,7 +49,7 @@ const MedicationsNameListToolbar = () => {
 							"Are you sure you want to export the data to PDF?"
 						)
 					) {
-						exportToPDF(data);
+						exportToPDF(data, currentUser?.user.name);
 					}
 				}}
 			>

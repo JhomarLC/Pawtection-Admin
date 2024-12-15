@@ -4,6 +4,7 @@ import { useListView } from "../../core/ListViewProvider";
 import { useQueryResponseData } from "../../core/QueryResponseProvider";
 import { EventsListFilter } from "./EventsListFilter";
 import { exportToExcel, exportToPDF } from "../../core/_requests";
+import { useAuth } from "../../../../../auth";
 // import { exportToExcel } from "../../core/_requests";
 
 const EventsListToolbar = () => {
@@ -13,6 +14,8 @@ const EventsListToolbar = () => {
 	};
 	const users = useQueryResponseData();
 	const data = useMemo(() => users, [users]);
+
+	const { currentUser } = useAuth();
 
 	return (
 		<div
@@ -47,7 +50,7 @@ const EventsListToolbar = () => {
 							"Are you sure you want to export the data to PDF?"
 						)
 					) {
-						exportToPDF(data);
+						exportToPDF(data, currentUser?.user.name);
 					}
 				}}
 			>
